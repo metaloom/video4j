@@ -43,7 +43,7 @@ try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
 
 
     // Display the frame in a window
-	ImageUtils.show(image);
+    ImageUtils.show(image);
 }   
 
 ```
@@ -57,7 +57,7 @@ try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
     Stream<Mat> frameStream = video.streamMat()
         .skip(1000)
         .map(CVUtils::faceDetectAndDisplay)
-		.map(frame -> CVUtils.canny(frame, 50, 300));
+        .map(frame -> CVUtils.canny(frame, 50, 300));
     VideoUtils.showMatStream(frameStream);
 }
 ```
@@ -77,7 +77,7 @@ try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
         .map(CVUtils::faceDetectAndDisplay)
         
         // Apply the canny filter for edge detection
-		.map(frame -> CVUtils.canny(frame, 50, 300));
+        .map(frame -> CVUtils.canny(frame, 50, 300));
     VideoUtils.showVideoFrameStream(frameStream);
 }
 ```
