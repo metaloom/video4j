@@ -96,7 +96,7 @@ Save preview image to disk
 int tileSize = 128;
 int rows = 3;
 int cols = 3;
-PreviewGenerator gen = new PreviewGenerator(tileSize, rows, cols;
+PreviewGenerator gen = new PreviewGenerator(tileSize, rows, cols);
 try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
     gen.save(video, new File("target/output.jpg"));
 }
