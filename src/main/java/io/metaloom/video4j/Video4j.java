@@ -1,12 +1,7 @@
 package io.metaloom.video4j;
 
-import java.io.File;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.metaloom.video4j.impl.VideoImpl;
-import io.metaloom.video4j.opencv.ExtendedVideoCapture;
 
 public class Video4j {
 

@@ -41,7 +41,6 @@ try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
     // Read the frame and resize it to a width of 256 pixel.
     BufferdImage image2 = video.boxedFrameToImage(256);
 
-
     // Display the frame in a window
     ImageUtils.show(image);
 }   
