@@ -4,6 +4,15 @@ Video4j is a highlevel library ontop of `org.openpnp:opencv` which provides APIs
 
 ![VideoPlayer](examples/output.gif)
 
+## Maven
+
+```xml
+<dependency>
+	<groupId>io.metaloom.video</groupId>
+	<artifactId>video4j</artifactId>
+	<version>1.0.0</version>
+</dependency>
+```
 
 ## Typical Usage
 
