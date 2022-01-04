@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 
 import org.opencv.core.Mat;
 
-public interface VideoFrame {
+public interface VideoFrame extends AutoCloseable {
 
 	/**
 	 * Return the frame number.

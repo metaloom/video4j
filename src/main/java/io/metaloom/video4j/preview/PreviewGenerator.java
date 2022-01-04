@@ -17,10 +17,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.metaloom.video4j.Video;
+import io.metaloom.video4j.impl.MatProvider;
+import io.metaloom.video4j.opencv.CVUtils;
 import io.metaloom.video4j.utils.ImageUtils;
 
 public class PreviewGenerator {
-
 
 	private static long SEEK_OFFSET = 6000;
 
@@ -58,7 +59,6 @@ public class PreviewGenerator {
 			video.seekToFrame(skip);
 		}
 
-
 		int segments = (rows * cols) + 2;
 
 		long current = skip;
@@ -66,8 +66,11 @@ public class PreviewGenerator {
 		int segment = 1;
 		long nFrame = 0;
 		List<Mat> frames = new ArrayList<>();
+		Mat frame = MatProvider.mat();
 		while (true) {
-			Mat frame = video.boxedFrameToMat(tileWidth);
+			if (!video.boxedFrame(frame, tileWidth)) {
+				break;
+			}
 			video.seekToFrame(nFrame);
 			if (text) {
 				Imgproc.putText(frame, "s: " + segment, new Point(0, 25), Imgproc.FONT_HERSHEY_DUPLEX, 0.8d, Scalar.all(255), 1);
@@ -75,10 +78,9 @@ public class PreviewGenerator {
 			}
 
 			if (handler != null) {
-				Mat tileMap = generateTilemap(frames, cols, rows);
-				handler.update(tileMap);
+				handler.update(generateTilemap(frames, cols, rows));
 			}
-			frames.add(frame);
+			frames.add(frame.clone());
 
 			long newStart = current += skipLen;
 			if (newStart >= totalFrames) {
@@ -88,26 +90,29 @@ public class PreviewGenerator {
 			video.seekToFrame(newStart);
 			nFrame = newStart;
 		}
-		//video.close();
-		Mat tileMap = generateTilemap(frames, cols, rows);
-		return ImageUtils.matToBufferedImage(tileMap);
+		BufferedImage image = generateTilemap(frames, cols, rows);
+		// Release resources
+		CVUtils.free(frames);
+		CVUtils.free(frame);
+		return image;
 	}
 
-	private Mat generateTilemap(List<Mat> frames, int cols, int rows) {
+	private BufferedImage generateTilemap(List<Mat> frames, int cols, int rows) {
 		if (frames.isEmpty()) {
-			return new Mat();
+			return null;
 		}
 		List<Mat> reversed = new ArrayList<>(frames);
 		Collections.reverse(reversed);
 		Stack<Mat> stack = new Stack<>();
 		stack.addAll(reversed);
 
-		Mat target = new Mat();
+		Mat target = MatProvider.mat();
 		List<Mat> allRows = new ArrayList<>();
 		while (!stack.isEmpty()) {
 			List<Mat> rowList = pullElements(stack, cols + 1);
-			Mat row = new Mat();
+			Mat row = MatProvider.mat();
 			Core.hconcat(rowList, row);
+			CVUtils.free(rowList);
 			allRows.add(row);
 		}
 		// for(Mat row : allRows) {
@@ -118,12 +123,18 @@ public class PreviewGenerator {
 		if (rows != 1) {
 			try {
 				Core.vconcat(allRows, target);
+				CVUtils.free(allRows);
 			} catch (Exception e) {
 				// Ignored
 			}
-			return target;
+
+			BufferedImage image = CVUtils.mat2BufferedImage(target);
+			CVUtils.free(target);
+			return image;
 		} else {
-			return allRows.get(0);
+			BufferedImage image = CVUtils.mat2BufferedImage(allRows.get(0));
+			CVUtils.free(allRows);
+			return image;
 		}
 	}
 

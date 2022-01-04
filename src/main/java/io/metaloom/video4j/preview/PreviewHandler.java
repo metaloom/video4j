@@ -1,10 +1,10 @@
 package io.metaloom.video4j.preview;
 
-import org.opencv.core.Mat;
+import java.awt.image.BufferedImage;
 
 @FunctionalInterface
 public interface PreviewHandler {
 
-	void update(Mat source);
+	void update(BufferedImage image);
 
 }

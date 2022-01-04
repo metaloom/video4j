@@ -2,6 +2,7 @@ package io.metaloom.video4j.opencv;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.util.Collection;
 import java.util.Random;
 
 import org.imgscalr.Scalr;
@@ -19,6 +20,7 @@ import org.opencv.objdetect.Objdetect;
 import com.twelvemonkeys.image.ResampleOp;
 
 import io.metaloom.video4j.VideoFrame;
+import io.metaloom.video4j.impl.MatProvider;
 
 public class CVUtils {
 
@@ -54,7 +56,7 @@ public class CVUtils {
 	}
 
 	public static Mat blur(Mat origin) {
-		Mat blured = new Mat();
+		Mat blured = MatProvider.mat();
 		Imgproc.blur(origin, blured, new Size(20, 20), new Point(15, 15));
 		return blured;
 	}
@@ -65,11 +67,11 @@ public class CVUtils {
 	}
 
 	public static Mat harris(Mat origin) {
-		Mat grayMat = new Mat();
+		Mat grayMat = MatProvider.mat();
 		Imgproc.cvtColor(origin, grayMat, Imgproc.COLOR_RGB2GRAY);
-		Mat corners = new Mat();
-		Mat tempDst = new Mat();
-		Mat tempDstNorm = new Mat();
+		Mat corners = MatProvider.mat();
+		Mat tempDst = MatProvider.mat();
+		Mat tempDstNorm = MatProvider.mat();
 		Imgproc.cornerHarris(grayMat, tempDst, 2, 3, 0.04);
 		Core.normalize(tempDst, tempDstNorm, 0, 255, Core.NORM_MINMAX);
 		Core.convertScaleAbs(tempDstNorm, corners);
@@ -113,9 +115,9 @@ public class CVUtils {
 	 * @return
 	 */
 	public static Mat canny(Mat frame, double threshold1, double threshold2) {
-		Mat grayFrame = new Mat();
+		Mat grayFrame = MatProvider.mat();
 		Imgproc.cvtColor(frame, grayFrame, Imgproc.COLOR_RGB2GRAY);
-		Mat edges = new Mat();
+		Mat edges = MatProvider.mat();
 		Imgproc.Canny(grayFrame, edges, threshold1, threshold2);
 		return edges;
 	}
@@ -128,7 +130,7 @@ public class CVUtils {
 	public static Mat houghLines(Mat frame, double rho, double theta, int threshold, double srn, double stn) {
 		Mat cannyColor = frame.clone();
 		Imgproc.cvtColor(frame, cannyColor, Imgproc.COLOR_GRAY2BGR);
-		Mat lines = new Mat();
+		Mat lines = MatProvider.mat();
 		Imgproc.HoughLines(frame, lines, rho, theta, threshold, srn, stn);
 
 		for (int i = 0; i < lines.rows(); i++) {
@@ -172,7 +174,7 @@ public class CVUtils {
 		Mat cannyColor = frame.clone();
 		Imgproc.cvtColor(frame, cannyColor, Imgproc.COLOR_GRAY2BGR);
 
-		Mat lines = new Mat();
+		Mat lines = MatProvider.mat();
 		Imgproc.HoughLinesP(frame, lines, rho, theta, threshold, minLineLength, maxLineGap);
 
 		for (int i = 0; i < lines.rows(); i++) {
@@ -203,7 +205,7 @@ public class CVUtils {
 	 */
 	public static Mat faceDetectAndDisplay(Mat frame) {
 		MatOfRect faces = new MatOfRect();
-		Mat grayFrame = new Mat();
+		Mat grayFrame = MatProvider.mat();
 		CascadeClassifier faceCascade = new CascadeClassifier();
 		String profileXML = "src/main/resources/lbpcascade_profileface.xml";
 		if (!faceCascade.load(profileXML)) {
@@ -243,7 +245,7 @@ public class CVUtils {
 	 * @return
 	 */
 	public static Mat empty(Mat source) {
-		return new Mat(source.size(), source.type(), Scalar.all(0f));
+		return MatProvider.empty(source);
 	}
 
 	/**
@@ -324,6 +326,21 @@ public class CVUtils {
 		Imgproc.resize(target, target, new Size(resX, resY), 0, 0, method);
 		Core.copyMakeBorder(target, frame, spaceY, spaceY, 0, 0, Core.BORDER_CONSTANT);
 		return false;
+	}
+
+	public static void free(Collection<Mat> mats) {
+		for (Mat mat : mats) {
+			MatProvider.released(mat);
+		}
+	}
+
+	public static void free(Mat... mats) {
+		for (Mat mat : mats) {
+			if (mat == null) {
+				continue;
+			}
+			MatProvider.released(mat);
+		}
 	}
 
 }

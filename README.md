@@ -8,9 +8,9 @@ Video4j is a highlevel library ontop of `org.openpnp:opencv` which provides APIs
 
 ```xml
 <dependency>
-	<groupId>io.metaloom.video</groupId>
-	<artifactId>video4j</artifactId>
-	<version>1.0.0</version>
+  <groupId>io.metaloom.video</groupId>
+  <artifactId>video4j</artifactId>
+  <version>1.0.0</version>
 </dependency>
 ```
 
@@ -53,7 +53,6 @@ try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
     // Display the frame in a window
     ImageUtils.show(image);
 }   
-
 ```
 
 ## Streaming of frames
@@ -124,6 +123,27 @@ try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
 The `VideoUtils` contains methods to startup a very basic video player which can show the video.
 
 The `CVUtils` contain utility methods that can be used to modify the frame image data (e.g blur, greyscale, canny filter, contrast..)
+
+## Tips / Pitfalls
+
+
+### Memory
+
+Video frame data will be provided via opencv `Mat` objects. These objects are linked to JNI data which means they need to be manually released after usage. The `MatProvider` methods can be used to instantiate new `Mat` objects. The provider will in-turn keep track of the instances. The `CVUtils#free` methods can be used to `release` the mat objects after use.
+For development the `MatProvider#printLeaks` method can be used to verify that all instances have been released.
+
+### Performance
+
+When using `Mat` instances it is advised to reuse them if possible and to provide existing Mats to read frame data. This can for example be done by usage of the  `Video#frame(Mat)` method.
+
+```java
+Mat frame = MatProvider.mat();
+while (true) {
+    if (!video.frame(frame)) {
+        break;
+    }
+…
+```
 
 ## Requirements / Limitations
 

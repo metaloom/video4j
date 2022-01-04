@@ -41,6 +41,14 @@ public interface Video extends AutoCloseable, Iterable<Mat> {
 	Mat frameToMat();
 
 	/**
+	 * Read the next frame data into the provided {@link Mat}
+	 * 
+	 * @param mat
+	 * @return True if the frame could be read
+	 */
+	boolean frame(Mat mat);
+
+	/**
 	 * Read the current frame and return it as a resized buffered image. This operation will advance the position to the next frame.
 	 * 
 	 * @param width
@@ -67,6 +75,15 @@ public interface Video extends AutoCloseable, Iterable<Mat> {
 	 * @return
 	 */
 	Mat boxedFrameToMat(int width);
+
+	/**
+	 * Read the next frame.
+	 * 
+	 * @param frame
+	 * @param width
+	 * @return True if the frame could be reads
+	 */
+	boolean boxedFrame(Mat frame, int width);
 
 	/**
 	 * Return the current set frame.

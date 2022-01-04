@@ -90,7 +90,7 @@ public class VideoImpl implements Video {
 	@Override
 	public BufferedImage frameToImage() {
 		assertOpen();
-		Mat frame = new Mat();
+		Mat frame = MatProvider.mat();
 		capture.read(frame);
 		return ImageUtils.matToBufferedImage(frame);
 	}
@@ -98,15 +98,21 @@ public class VideoImpl implements Video {
 	@Override
 	public Mat frameToMat() {
 		assertOpen();
-		Mat frame = new Mat();
+		Mat frame = MatProvider.mat();
 		capture.read(frame);
 		return frame;
 	}
 
 	@Override
+	public boolean frame(Mat frame) {
+		assertOpen();
+		return capture.read(frame);
+	}
+
+	@Override
 	public BufferedImage frameToImage(int width, int height) {
 		assertOpen();
-		Mat frame = new Mat();
+		Mat frame = MatProvider.mat();
 		if (!capture.read(frame, width, height)) {
 			return null;
 		}
@@ -116,15 +122,21 @@ public class VideoImpl implements Video {
 	@Override
 	public BufferedImage boxedFrameToImage(int width) {
 		assertOpen();
-		Mat frame = new Mat();
+		Mat frame = MatProvider.mat();
 		capture.readBoxed(frame, width);
 		return ImageUtils.matToBufferedImage(frame);
 	}
 
 	@Override
+	public boolean boxedFrame(Mat frame, int width) {
+		assertOpen();
+		return capture.readBoxed(frame, width);
+	}
+
+	@Override
 	public Mat boxedFrameToMat(int width) {
 		assertOpen();
-		Mat frame = new Mat();
+		Mat frame = MatProvider.mat();
 		capture.readBoxed(frame, width);
 		return frame;
 	}
@@ -176,8 +188,7 @@ public class VideoImpl implements Video {
 
 			@Override
 			public VideoFrame next() {
-				VideoFrame frame = new VideoFrameImpl(vid, currentFrame(), frameToMat());
-				return frame;
+				return new VideoFrameImpl(vid, currentFrame(), frameToMat());
 			}
 
 			@Override

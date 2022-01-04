@@ -32,6 +32,13 @@ public class VideoFrameImpl implements VideoFrame {
 	}
 
 	@Override
+	public void close() throws Exception {
+		if (frame != null) {
+			frame.release();
+		}
+	}
+
+	@Override
 	public Mat mat() {
 		return frame;
 	}

@@ -2,6 +2,7 @@ package io.metaloom.video4j.ui;
 
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,8 +13,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-
-import org.opencv.core.Mat;
 
 import io.metaloom.video4j.Video;
 import io.metaloom.video4j.Videos;
@@ -59,13 +58,13 @@ public class PreviewDebugUI {
 	private Component createPlayButton() {
 		ImageIcon playButtonIcon = createImageIcon("/images/play.gif");
 		JButton playButton = new JButton("Play", playButtonIcon);
-		Video video = Videos.get(path);
-		playButton.addActionListener(event -> {
-			video.open();
-			for (PreviewGenerator handler : handlers) {
-				handler.preview(video, a -> refresh(handler, a));
-			}
-		});
+		try (Video video = Videos.open(path)) {
+			playButton.addActionListener(event -> {
+				for (PreviewGenerator handler : handlers) {
+					handler.preview(video, image -> refresh(handler, image));
+				}
+			});
+		}
 		return playButton;
 	}
 
@@ -74,7 +73,7 @@ public class PreviewDebugUI {
 		return new ImageIcon(imgURL);
 	}
 
-	public void refresh(PreviewGenerator handler, Mat image) {
+	public void refresh(PreviewGenerator handler, BufferedImage image) {
 		MediaPreviewPanel preview = vidsPanels.get(handler);
 		preview.setImage(image);
 		preview.repaint();

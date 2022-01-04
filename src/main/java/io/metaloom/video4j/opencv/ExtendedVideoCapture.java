@@ -6,6 +6,8 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
+import io.metaloom.video4j.impl.MatProvider;
+
 /**
  * Extended OpenCV API
  */
@@ -95,7 +97,7 @@ public class ExtendedVideoCapture extends VideoCapture {
 	 */
 	public boolean read(Mat frame, int resX, int resY) {
 		int spaceY = (resX - resY) / 2;
-		Mat target = new Mat();
+		Mat target = MatProvider.mat();
 		boolean flag = read(target);
 		Imgproc.resize(target, target, new Size(resX, resY), 0, 0, Imgproc.INTER_LANCZOS4);
 		Core.copyMakeBorder(target, frame, spaceY, spaceY, 0, 0, Core.BORDER_CONSTANT);
