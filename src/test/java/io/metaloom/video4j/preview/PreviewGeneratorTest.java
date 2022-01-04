@@ -19,15 +19,19 @@ public class PreviewGeneratorTest extends AbstractVideoTest {
 
 	@Test
 	public void testSavePreview() throws IOException {
+		MatProvider.enableTracking();
 		File dest = new File("target/output.jpg");
 		PreviewGenerator gen = new PreviewGenerator(TILE_SIZE, 3, 3);
 		try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
 			gen.save(video, dest);
 		}
+		MatProvider.printLeaks();
+		assertFalse("There should not be any leaked mats", MatProvider.hasLeaks());
 	}
 
 	@Test
 	public void testPreview() {
+		MatProvider.enableTracking();
 		PreviewGenerator gen = new PreviewGenerator(TILE_SIZE, 6, 3);
 		try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
 			ImageUtils.show(gen.preview(video));

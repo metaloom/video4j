@@ -132,6 +132,17 @@ The `CVUtils` contain utility methods that can be used to modify the frame image
 Video frame data will be provided via opencv `Mat` objects. These objects are linked to JNI data which means they need to be manually released after usage. The `MatProvider` methods can be used to instantiate new `Mat` objects. The provider will in-turn keep track of the instances. The `CVUtils#free` methods can be used to `release` the mat objects after use.
 For development the `MatProvider#printLeaks` method can be used to verify that all instances have been released.
 
+```java
+MatProvider.enableTracking();
+…
+Mat frame = MatProvider.mat();
+// You OpenCV / Video4j Code
+CVUtils.free(frame);
+…
+MatProvider.printLeaks();
+assertFalse("There should not be any leaked mats", MatProvider.hasLeaks());
+```
+
 ### Performance
 
 When using `Mat` instances it is advised to reuse them if possible and to provide existing Mats to read frame data. This can for example be done by usage of the  `Video#frame(Mat)` method.

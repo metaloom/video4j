@@ -11,6 +11,8 @@ public class MatProvider {
 
 	public static Map<Mat, UnreleasedMatException> trackedInstances = new HashMap<>();
 
+	public static boolean tracking = false;
+
 	public static Mat mat() {
 		Mat mat = new Mat();
 		track(mat);
@@ -39,6 +41,16 @@ public class MatProvider {
 	}
 
 	private static void track(Mat mat) {
-		trackedInstances.put(mat, new UnreleasedMatException());
+		if (tracking) {
+			trackedInstances.put(mat, new UnreleasedMatException());
+		}
+	}
+
+	public static void enableTracking() {
+		tracking = true;
+	}
+
+	public static void disableTracking() {
+		tracking = true;
 	}
 }
