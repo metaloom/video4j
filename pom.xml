@@ -5,7 +5,7 @@
 
 	<groupId>io.metaloom.video</groupId>
 	<artifactId>video4j</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.1.0-SNAPSHOT</version>
 
 	<parent>
 		<groupId>io.metaloom</groupId>

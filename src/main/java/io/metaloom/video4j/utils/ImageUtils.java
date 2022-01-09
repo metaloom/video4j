@@ -18,6 +18,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
+import org.imgscalr.Scalr;
+import org.imgscalr.Scalr.Method;
 import org.opencv.core.Mat;
 
 /**
@@ -28,7 +30,17 @@ public final class ImageUtils {
 	private ImageUtils() {
 
 	}
-	
+
+	public static void show(Mat mat) {
+		show(matToBufferedImage(mat));
+	}
+
+	public static void show(Mat mat, int width) {
+		BufferedImage image = matToBufferedImage(mat);
+		image = Scalr.resize(image, Method.SPEED, width);
+		show(image);
+	}
+
 	public static void show(BufferedImage image) {
 		JFrame frame = new JFrame();
 		frame.getContentPane().setLayout(new FlowLayout());

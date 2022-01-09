@@ -343,4 +343,18 @@ public class CVUtils {
 		}
 	}
 
+	/**
+	 * Set all entries in the {@link Mat} with the provided value.
+	 * 
+	 * @param mat
+	 * @param value
+	 */
+	public static void clear(Mat mat, double value) {
+		for (int x = 0; x < mat.width(); x++) {
+			for (int y = 0; y < mat.height(); y++) {
+				mat.put(x, y, value);
+			}
+		}
+	}
+
 }
