@@ -1,6 +1,6 @@
 project:
   name: video4j
-  version: 1.0.0
+  version: 1.1.0
   versionPattern: SEMVER
 
   description: Video4j Java Video Processing Library
