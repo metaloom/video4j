@@ -186,7 +186,15 @@ public class CVUtils {
 		return cannyColor;
 	}
 
-	public static BufferedImage blowUp(BufferedImage image, int x, int y) {
+	/**
+	 * Resize the image to the matching dimensions.
+	 * 
+	 * @param image
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public static BufferedImage scale(BufferedImage image, int x, int y) {
 		BufferedImage resizedImage = Scalr.apply(image, new ResampleOp(x, y, ResampleOp.FILTER_POINT));
 		resizedImage.flush();
 		return resizedImage;

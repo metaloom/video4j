@@ -41,6 +41,18 @@ public final class ImageUtils {
 		show(image);
 	}
 
+	/**
+	 * Show a scaled version of the provided image.
+	 * 
+	 * @param image
+^	 * @param width
+	 *            New width of the image to be shown
+	 */
+	public static void show(BufferedImage image, int width) {
+		image = Scalr.resize(image, Method.SPEED, width);
+		show(image);
+	}
+
 	public static void show(BufferedImage image) {
 		JFrame frame = new JFrame();
 		frame.getContentPane().setLayout(new FlowLayout());
