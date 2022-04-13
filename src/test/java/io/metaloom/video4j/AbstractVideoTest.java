@@ -13,6 +13,8 @@ public class AbstractVideoTest {
 
 	public static final String BIG_BUCK_BUNNY2_PATH = "src/test/resources/BigBuckBunny.mp4";
 
+	public static final String BIG_BUCK_BUNNY_VVS_PATH = "src/test/resources/BigBuckBunny_VVS.mp4";
+
 	protected void sleep(int timeMs) {
 		try {
 			Thread.sleep(timeMs);

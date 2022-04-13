@@ -326,9 +326,11 @@ public class CVUtils {
 	public static boolean boxFrame(Mat frame, int resX, int width, int height) {
 		double ratio = (double) width / (double) height;
 
-		int resY = (int) (((double) resX) / ratio);
-		int spaceY = (resX - resY) / 2;
+		// Check for vertical video syndrom
+		boolean vvs = ratio < 1;
+		int resY = vvs ? (int) (((double) resX) * ratio) : (int) (((double) resX) / ratio);
 
+		int spaceY = (resX - resY) / 2;
 		Mat target = frame.clone();
 		int method = Imgproc.INTER_LANCZOS4;
 		Imgproc.resize(target, target, new Size(resX, resY), 0, 0, method);
