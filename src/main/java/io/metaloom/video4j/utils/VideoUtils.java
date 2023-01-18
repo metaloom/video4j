@@ -76,13 +76,13 @@ public class VideoUtils {
 		player.playMatStream(frameStream);
 	}
 
-	public static void showVideoFrameStream(Stream<VideoFrame> frameStream) {
+	public static void showVideoFrameStream(Stream<? extends VideoFrame> frameStream) {
 		SimpleVideoPlayer player = new SimpleVideoPlayer(256);
 		player.show();
 		player.playVideoFrameStream(frameStream);
 	}
 
-	public static void showVideoFrameStream(Stream<VideoFrame> frameStream, int width) {
+	public static void showVideoFrameStream(Stream<? extends VideoFrame> frameStream, int width) {
 		SimpleVideoPlayer player = new SimpleVideoPlayer(256);
 		player.show();
 		player.playVideoFrameStream(frameStream, width);

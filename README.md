@@ -30,7 +30,7 @@ try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
     video.fps();
 
     // Total frames of the video
-    video.length()
+    video.length();
 
     // Seek to specific frame
     video.seekToFrame(1020);
@@ -48,7 +48,7 @@ try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
     BufferedImage image = video.frameToImage();
 
     // Read the frame and resize it to a width of 256 pixel.
-    BufferdImage image2 = video.boxedFrameToImage(256);
+    BufferedImage image2 = video.boxedFrameToImage(256);
 
     // Display the frame in a window
     ImageUtils.show(image);

@@ -58,13 +58,13 @@ public class PreviewDebugUI {
 	private Component createPlayButton() {
 		ImageIcon playButtonIcon = createImageIcon("/images/play.gif");
 		JButton playButton = new JButton("Play", playButtonIcon);
-		try (Video video = Videos.open(path)) {
-			playButton.addActionListener(event -> {
+		playButton.addActionListener(event -> {
+			try (Video video = Videos.open(path)) {
 				for (PreviewGenerator handler : handlers) {
 					handler.preview(video, image -> refresh(handler, image));
 				}
-			});
-		}
+			}
+		});
 		return playButton;
 	}
 

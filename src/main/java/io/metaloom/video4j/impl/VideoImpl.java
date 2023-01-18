@@ -18,6 +18,7 @@ public class VideoImpl implements Video {
 
 	private final String path;
 	private final ExtendedVideoCapture capture;
+	private Object meta;
 
 	public VideoImpl(String path, ExtendedVideoCapture capture) {
 		this.path = path;
@@ -25,7 +26,9 @@ public class VideoImpl implements Video {
 	}
 
 	public Video open() {
-		capture.open(path);
+		if (!capture.open(path)) {
+			throw new RuntimeException("Video " + path + " could not be opened.");
+		}
 		return this;
 	}
 
@@ -74,6 +77,17 @@ public class VideoImpl implements Video {
 	public int width() {
 		assertOpen();
 		return capture.width();
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T getMeta() {
+		return (T) meta;
+	}
+
+	@Override
+	public <T> void setMeta(T meta) {
+		this.meta = meta;
 	}
 
 	@Override

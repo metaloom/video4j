@@ -13,6 +13,7 @@ import io.metaloom.video4j.utils.ImageUtils;
 public class VideoAPITest extends AbstractVideoTest {
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testAPI() throws Exception {
 
 		Video v;

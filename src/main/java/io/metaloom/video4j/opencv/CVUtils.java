@@ -1,11 +1,17 @@
 package io.metaloom.video4j.opencv;
 
+import java.awt.AlphaComposite;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferInt;
 import java.util.Collection;
 import java.util.Random;
 
 import org.imgscalr.Scalr;
+import org.imgscalr.Scalr.Method;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
@@ -26,23 +32,74 @@ public class CVUtils {
 
 	private static final double BLACK_FRAME_THRESHOLD = 10.0f;
 
-	/**
-	 * Convert the {@link Mat} into a {@link BufferedImage}.
-	 * 
-	 * @param m
-	 * @return
-	 */
-	public static BufferedImage mat2BufferedImage(Mat m) {
-		int type = BufferedImage.TYPE_BYTE_GRAY;
-		if (m.channels() > 1) {
-			type = BufferedImage.TYPE_3BYTE_BGR;
+	public static BufferedImage matToBufferedImage(Mat original) {
+		BufferedImage image = null;
+		int width = original.width(), height = original.height(), channels = original.channels();
+		byte[] sourcePixels = new byte[width * height * channels];
+		original.get(0, 0, sourcePixels);
+
+		if (original.channels() > 1) {
+			image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+		} else {
+			image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
 		}
-		int bufferSize = m.channels() * m.cols() * m.rows();
-		byte[] b = new byte[bufferSize];
-		m.get(0, 0, b);
-		BufferedImage image = new BufferedImage(m.cols(), m.rows(), type);
 		final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-		System.arraycopy(b, 0, targetPixels, 0, b.length);
+		System.arraycopy(sourcePixels, 0, targetPixels, 0, sourcePixels.length);
+
+		return image;
+	}
+
+	public static void bufferedImageToMat(BufferedImage image, Mat dest) {
+
+		DataBuffer dataBuffer = image.getRaster().getDataBuffer();
+		byte[] imgPixels = null;
+
+		int width = image.getWidth();
+		int height = image.getHeight();
+
+		if (dataBuffer instanceof DataBufferByte) {
+			imgPixels = ((DataBufferByte) dataBuffer).getData();
+		}
+
+		if (dataBuffer instanceof DataBufferInt) {
+
+			int byteSize = width * height;
+			imgPixels = new byte[byteSize * 3];
+
+			int[] imgIntegerPixels = ((DataBufferInt) dataBuffer).getData();
+
+			for (int p = 0; p < byteSize; p++) {
+				imgPixels[p * 3 + 0] = (byte) ((imgIntegerPixels[p] & 0x00FF0000) >> 16);
+				imgPixels[p * 3 + 1] = (byte) ((imgIntegerPixels[p] & 0x0000FF00) >> 8);
+				imgPixels[p * 3 + 2] = (byte) (imgIntegerPixels[p] & 0x000000FF);
+			}
+		}
+
+		dest.put(0, 0, imgPixels);
+	}
+
+	public static BufferedImage toBufferedImageOfType(BufferedImage original, int type) {
+		if (original == null) {
+			throw new IllegalArgumentException("original == null");
+		}
+
+		// Don't convert if it already has correct type
+		if (original.getType() == type) {
+			return original;
+		}
+
+		// Create a buffered image
+		BufferedImage image = new BufferedImage(original.getWidth(), original.getHeight(), type);
+
+		// Draw the image onto the new buffer
+		Graphics2D g = image.createGraphics();
+		try {
+			g.setComposite(AlphaComposite.Src);
+			g.drawImage(original, 0, 0, null);
+		} finally {
+			g.dispose();
+		}
+
 		return image;
 	}
 
@@ -89,6 +146,83 @@ public class CVUtils {
 
 	public static void resize(Mat step1, Mat step2, int x, int y) {
 		Imgproc.resize(step1, step2, new Size(x, y), 0, 0, Imgproc.INTER_LANCZOS4);
+	}
+
+	public static boolean boxFrame2(VideoFrame vframe, int resX) {
+		// return boxFrame2(frame.mat(), resX);
+
+		Mat frame = vframe.mat();
+		int width = frame.width();
+		int height = frame.height();
+
+		double ratio = (double) width / (double) height;
+
+		// Check for vertical video syndrome
+		boolean vvs = ratio < 1;
+		int resY = vvs ? (int) (((double) resX) * ratio) : (int) (((double) resX) / ratio);
+
+		int spaceY = (resX - resY) / 2;
+		Mat target = null;
+		if (vvs) {
+			target = new Mat(resX, resY, frame.type());
+			resize2(frame, target, resY, resX);
+			free(frame);
+		} else {
+			target = new Mat(resY, resX, frame.type());
+			resize2(frame, target, resX, resY);
+			free(frame);
+
+		}
+		Core.copyMakeBorder(target, target, spaceY, spaceY, 0, 0, Core.BORDER_CONSTANT);
+		vframe.setMat(target);
+
+		return false;
+	}
+
+	public static boolean boxFrame2(Mat frame, int resX) {
+		return boxFrame2(frame, resX, frame.width(), frame.height());
+	}
+
+	public static boolean boxFrame2(Mat frame, int resX, int width, int height) {
+		double ratio = (double) width / (double) height;
+
+		// Check for vertical video syndrome
+		boolean vvs = ratio < 1;
+		int resY = vvs ? (int) (((double) resX) * ratio) : (int) (((double) resX) / ratio);
+
+		int spaceY = (resX - resY) / 2;
+		Mat target = null;
+		if (vvs) {
+			target = new Mat(resY, resX, frame.type());
+			resize2(frame, target, resY, resX);
+		} else {
+			target = new Mat(resX, resY, frame.type());
+			resize2(frame, target, resX, resY);
+		}
+		// Core.copyMakeBorder(target, frame, spaceY, spaceY, 0, 0, Core.BORDER_CONSTANT);
+		free(target);
+
+		return false;
+
+	}
+
+	/**
+	 * Resizes the source image using non-opencv methods.
+	 * 
+	 * @param sourceMat
+	 * @param destMat
+	 * @param x
+	 * @param y
+	 */
+	public static void resize2(Mat sourceMat, Mat destMat, int x, int y) {
+		// 1. Convert the mat to a buffered image which can be processed
+		BufferedImage sourceImage = matToBufferedImage(sourceMat);
+		// 2. Resize the image
+		BufferedImage resizedImage = Scalr.resize(sourceImage, Method.SPEED, x, y);
+		// 3. Convert the type of the image so that conversion to mat can succeed
+		sourceImage = toBufferedImageOfType(resizedImage, sourceImage.getType());
+		// 4. Convert back to mat
+		CVUtils.bufferedImageToMat(sourceImage, destMat);
 	}
 
 	/**
@@ -191,13 +325,32 @@ public class CVUtils {
 	 * 
 	 * @param image
 	 * @param x
+	 *            new width of the image
 	 * @param y
+	 *            new height of the image
 	 * @return
 	 */
 	public static BufferedImage scale(BufferedImage image, int x, int y) {
 		BufferedImage resizedImage = Scalr.apply(image, new ResampleOp(x, y, ResampleOp.FILTER_POINT));
 		resizedImage.flush();
 		return resizedImage;
+	}
+
+	/**
+	 * Crop the given frame area.
+	 * 
+	 * @param frame
+	 * @param start
+	 *            Start point of the crop
+	 * @param dim
+	 *            Dimension of crop area
+	 * @return
+	 */
+	public static VideoFrame crop(VideoFrame frame, java.awt.Point start, Dimension dim) {
+		Mat mat = frame.mat();
+		Imgproc.getRectSubPix(mat, new Size(dim.getWidth(), dim.getHeight()),
+			new Point(start.x + (dim.getWidth() / 2), start.y + (dim.getHeight() / 2)), mat);
+		return frame;
 	}
 
 	public static VideoFrame faceDetectAndDisplay(VideoFrame frame) {
@@ -217,7 +370,7 @@ public class CVUtils {
 		CascadeClassifier faceCascade = new CascadeClassifier();
 		String profileXML = "src/main/resources/lbpcascade_profileface.xml";
 		if (!faceCascade.load(profileXML)) {
-			throw new RuntimeException("Could not find " + profileXML);
+			throw new RuntimeException("Could not load " + profileXML);
 		}
 		// convert the frame in gray scale
 		Imgproc.cvtColor(frame, grayFrame, Imgproc.COLOR_BGR2GRAY);
@@ -241,6 +394,31 @@ public class CVUtils {
 		Rect[] facesArray = faces.toArray();
 		for (int i = 0; i < facesArray.length; i++) {
 			Imgproc.rectangle(frame, facesArray[i].tl(), facesArray[i].br(), new Scalar(0, 255, 0), 3);
+		}
+		return frame;
+
+	}
+
+	public static VideoFrame faceDetectAndDisplay2(VideoFrame frame) {
+		frame.setMat(faceDetectAndDisplay2(frame.mat()));
+		return frame;
+	}
+
+	public static Mat faceDetectAndDisplay2(Mat frame) {
+		CascadeClassifier faceDetector = new CascadeClassifier();
+		String profileXML = "src/main/resources/haarcascade_frontalface_alt.xml";
+		if (!faceDetector.load(profileXML)) {
+			throw new RuntimeException("Could not load " + profileXML);
+		}
+
+		// Detecting faces
+		MatOfRect faceDetections = new MatOfRect();
+		faceDetector.detectMultiScale(frame, faceDetections);
+
+		// Creating a rectangular box showing faces detected
+		for (Rect rect : faceDetections.toArray()) {
+			Imgproc.rectangle(frame, new Point(rect.x, rect.y), new Point(rect.width + rect.x,
+				rect.height + rect.y), new Scalar(0, 255, 0));
 		}
 		return frame;
 
@@ -326,15 +504,23 @@ public class CVUtils {
 	public static boolean boxFrame(Mat frame, int resX, int width, int height) {
 		double ratio = (double) width / (double) height;
 
-		// Check for vertical video syndrom
+		// Check for vertical video syndrome
 		boolean vvs = ratio < 1;
 		int resY = vvs ? (int) (((double) resX) * ratio) : (int) (((double) resX) / ratio);
 
 		int spaceY = (resX - resY) / 2;
-		Mat target = frame.clone();
 		int method = Imgproc.INTER_LANCZOS4;
-		Imgproc.resize(target, target, new Size(resX, resY), 0, 0, method);
+		Mat target = null;
+		if (vvs) {
+			target = new Mat(resY, resX, frame.type());
+			Imgproc.resize(frame, target, new Size(resY, resX), 0, 0, method);
+		} else {
+			target = new Mat(resX, resY, frame.type());
+			Imgproc.resize(frame, target, new Size(resX, resY), 0, 0, method);
+		}
 		Core.copyMakeBorder(target, frame, spaceY, spaceY, 0, 0, Core.BORDER_CONSTANT);
+		free(target);
+
 		return false;
 	}
 
@@ -365,6 +551,15 @@ public class CVUtils {
 				mat.put(x, y, value);
 			}
 		}
+	}
+
+	/**
+	 * @deprecated Use {@link #matToBufferedImage(Mat)} instead
+	 * @param mat
+	 * @return
+	 */
+	public static BufferedImage mat2BufferedImage(Mat mat) {
+		return matToBufferedImage(mat);
 	}
 
 }
