@@ -16,6 +16,7 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
+import org.opencv.core.Point3;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -28,7 +29,7 @@ import com.twelvemonkeys.image.ResampleOp;
 import io.metaloom.video4j.VideoFrame;
 import io.metaloom.video4j.impl.MatProvider;
 
-public class CVUtils {
+public final class CVUtils {
 
 	private static final double BLACK_FRAME_THRESHOLD = 10.0f;
 
@@ -486,9 +487,9 @@ public class CVUtils {
 	 * @param fontScale
 	 * @param color
 	 * @param thickness
-	 * @return
+	 * @return Fluent API
 	 */
-	public static VideoFrame drawText(VideoFrame frame, String text, Point pos, double fontScale, Scalar color, int thickness) {
+	public static <T extends VideoFrame> T drawText(T frame, String text, Point pos, double fontScale, Scalar color, int thickness) {
 		Imgproc.putText(frame.mat(), text, pos, Imgproc.FONT_HERSHEY_PLAIN, fontScale, color, thickness);
 		return frame;
 	}
@@ -560,6 +561,26 @@ public class CVUtils {
 	 */
 	public static BufferedImage mat2BufferedImage(Mat mat) {
 		return matToBufferedImage(mat);
+	}
+
+	/**
+	 * Convert a {@link Point} back into {@link org.opencv.core.Point}
+	 * 
+	 * @param awtPoint
+	 * @return
+	 */
+	public static org.opencv.core.Point toCVPoint(java.awt.Point awtPoint) {
+		return new org.opencv.core.Point(awtPoint.getX(), awtPoint.getY());
+	}
+
+	/**
+	 * Convert an OpenCV {@link Point} back to {@link java.awt.Point}n
+	 * 
+	 * @param cvPoint
+	 * @return
+	 */
+	public static java.awt.Point toAWTPoint(Point cvPoint) {
+		return new java.awt.Point((int) cvPoint.x, (int) cvPoint.y);
 	}
 
 }
