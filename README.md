@@ -10,7 +10,7 @@ Video4j is a highlevel library ontop of `org.openpnp:opencv` which provides APIs
 <dependency>
   <groupId>io.metaloom.video</groupId>
   <artifactId>video4j</artifactId>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
 </dependency>
 ```
 
@@ -158,13 +158,25 @@ while (true) {
 
 ## Requirements / Limitations
 
-The library uses OpenCV via JNI. Thus the JNI library `libopencv4.5-jni` must be installed on the host system.
+The library uses OpenCV via JNI. Thus the JNI library `libopencv406-jni` must be installed on the host system.
 Currently only Linux is supported.
 
 The JNI libraries need to be manually be loaded once via
 ```Video4j.init()```. This method will try its best to locate the library itself. 
 
-On Debian Linux the JNI library can be installed via the `libopencv4.5-jni` package. Version `4.5.1+dfsg-5` has been used for testing. Video4j expects the library to be locatable in the library path. Or via `/usr/lib/jni/libopencv_java451.so`.
-You can set `-Djava.library.path` for your application if the `libopencv_java451.so` file is located in a different directory.
+On Debian Linux the JNI library can be installed via the `libopencv406-jni` package. Version `4.6.0+dfsg-9+b1` has been used for testing. Video4j expects the library to be locatable in the library path. Or via `/usr/lib/jni/libopencv_java460.so`.
+You can set `-Djava.library.path` for your application if the `libopencv_java460.so` file is located in a different directory.
 
 The capabilities of the OpenCV code and thus this library is linked to the installed OpenCV library. If you are unable to open a specific video format this might be related to `libavcodec` library that was used to build the OpenCV library.
+
+## Releasing
+
+```bash
+# Run tests
+mvn clean package
+# Invoke release to maven central
+mvn clean deploy -Drelease
+# Publish release on github
+jreleaser config
+jreleaser full:release
+```

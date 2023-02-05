@@ -1,6 +1,6 @@
 project:
   name: video4j
-  version: 1.1.0
+  version: 1.2.0
   versionPattern: SEMVER
 
   description: Video4j Java Video Processing Library
@@ -10,8 +10,7 @@ project:
   authors:
     - Johannes Schüth
   license: Apache-2.0
-  extraProperties:
-    inceptionYear: 2022
+  inceptionYear: 2022
 
 release:
   github:
