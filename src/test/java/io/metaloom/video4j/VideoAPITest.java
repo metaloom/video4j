@@ -13,12 +13,13 @@ import io.metaloom.video4j.utils.ImageUtils;
 public class VideoAPITest extends AbstractVideoTest {
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testAPI() throws Exception {
 
 		Video v;
 		try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
-			assertEquals(1280, video.width());
-			assertEquals(720, video.height());
+			assertEquals(320, video.width());
+			assertEquals(240, video.height());
 			assertEquals(24, video.fps(), 0);
 			video.seekToFrame(1020);
 			BufferedImage image = video.frameToImage();

@@ -102,7 +102,7 @@ public interface Video extends AutoCloseable, Iterable<Mat> {
 	/**
 	 * Open the video.
 	 * 
-	 * @return Fluent APOI
+	 * @return Fluent API
 	 */
 	Video open();
 
@@ -140,6 +140,22 @@ public interface Video extends AutoCloseable, Iterable<Mat> {
 	 * @return
 	 */
 	String path();
+
+	/**
+	 * Return metadata for the video.
+	 * 
+	 * @param <T>
+	 * @return
+	 */
+	<T> T getMeta();
+
+	/**
+	 * Set metadata for the video.
+	 * 
+	 * @param <T>
+	 * @param meta
+	 */
+	<T> void setMeta(T meta);
 
 	/**
 	 * Return a stream of {@link Mat} frames for this video.

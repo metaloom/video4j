@@ -1,10 +1,9 @@
 package io.metaloom.video4j.utils;
 
+import java.awt.FlowLayout;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.io.IOException;
-import java.awt.FlowLayout;
 import java.util.Iterator;
 
 import javax.imageio.IIOImage;
@@ -22,6 +21,8 @@ import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Method;
 import org.opencv.core.Mat;
 
+import io.metaloom.video4j.opencv.CVUtils;
+
 /**
  * Image Utils which allow the conversion of OpenCV image data to regular java image objects.
  */
@@ -32,11 +33,11 @@ public final class ImageUtils {
 	}
 
 	public static void show(Mat mat) {
-		show(matToBufferedImage(mat));
+		show(CVUtils.matToBufferedImage(mat));
 	}
 
 	public static void show(Mat mat, int width) {
-		BufferedImage image = matToBufferedImage(mat);
+		BufferedImage image = CVUtils.matToBufferedImage(mat);
 		image = Scalr.resize(image, Method.SPEED, width);
 		show(image);
 	}
@@ -45,8 +46,7 @@ public final class ImageUtils {
 	 * Show a scaled version of the provided image.
 	 * 
 	 * @param image
-^	 * @param width
-	 *            New width of the image to be shown
+	 *            ^ * @param width New width of the image to be shown
 	 */
 	public static void show(BufferedImage image, int width) {
 		image = Scalr.resize(image, Method.SPEED, width);
@@ -59,23 +59,6 @@ public final class ImageUtils {
 		frame.getContentPane().add(new JLabel(new ImageIcon(image)));
 		frame.pack();
 		frame.setVisible(true);
-	}
-
-	public static BufferedImage matToBufferedImage(Mat original) {
-		BufferedImage image = null;
-		int width = original.width(), height = original.height(), channels = original.channels();
-		byte[] sourcePixels = new byte[width * height * channels];
-		original.get(0, 0, sourcePixels);
-
-		if (original.channels() > 1) {
-			image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
-		} else {
-			image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
-		}
-		final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-		System.arraycopy(sourcePixels, 0, targetPixels, 0, sourcePixels.length);
-
-		return image;
 	}
 
 	public static void save(File outputPath, BufferedImage image) throws IOException {
@@ -98,6 +81,10 @@ public final class ImageUtils {
 		params.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
 		params.setCompressionQuality(0.95f);
 		return params;
+	}
+
+	public static BufferedImage matToBufferedImage(Mat frame) {
+		return CVUtils.matToBufferedImage(frame);
 	}
 
 }

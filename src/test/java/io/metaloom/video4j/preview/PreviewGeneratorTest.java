@@ -40,4 +40,16 @@ public class PreviewGeneratorTest extends AbstractVideoTest {
 		MatProvider.printLeaks();
 		assertFalse("There should not be any leaked mats", MatProvider.hasLeaks());
 	}
+
+	@Test
+	public void testVVSPreview() {
+		MatProvider.enableTracking();
+		PreviewGenerator gen = new PreviewGenerator(TILE_SIZE, 6, 3);
+		try (Video video = Videos.open(BIG_BUCK_BUNNY_VVS_PATH)) {
+			ImageUtils.show(gen.preview(video));
+		}
+		sleep(250);
+		MatProvider.printLeaks();
+		assertFalse("There should not be any leaked mats", MatProvider.hasLeaks());
+	}
 }

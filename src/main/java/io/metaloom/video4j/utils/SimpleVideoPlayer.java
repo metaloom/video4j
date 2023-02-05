@@ -102,11 +102,11 @@ public class SimpleVideoPlayer {
 		}
 	}
 
-	public void playVideoFrameStream(Stream<VideoFrame> frameStream) {
+	public void playVideoFrameStream(Stream<? extends VideoFrame> frameStream) {
 		playVideoFrameStream(frameStream, 0);
 	}
 
-	public void playVideoFrameStream(Stream<VideoFrame> frameStream, int width) {
+	public void playVideoFrameStream(Stream<? extends VideoFrame> frameStream, int width) {
 		AtomicReference<Double> fps = new AtomicReference<>(null);
 		frameStream.forEach(frame -> {
 			if (fps.get() == null) {
@@ -120,7 +120,7 @@ public class SimpleVideoPlayer {
 				int fHeight = mat.height();
 				int fWidth = mat.width();
 				CVUtils.boxFrame(mat, width, fWidth, fHeight);
-				BufferedImage image = CVUtils.mat2BufferedImage(mat);
+				BufferedImage image = CVUtils.matToBufferedImage(mat);
 				refresh(image);
 			}
 			applySyncDelay(start, fps.get());

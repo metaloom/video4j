@@ -128,11 +128,11 @@ public class PreviewGenerator {
 				// Ignored
 			}
 
-			BufferedImage image = CVUtils.mat2BufferedImage(target);
+			BufferedImage image = CVUtils.matToBufferedImage(target);
 			CVUtils.free(target);
 			return image;
 		} else {
-			BufferedImage image = CVUtils.mat2BufferedImage(allRows.get(0));
+			BufferedImage image = CVUtils.matToBufferedImage(allRows.get(0));
 			CVUtils.free(allRows);
 			return image;
 		}
