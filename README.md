@@ -57,6 +57,7 @@ try (VideoFile video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
 
 ## Usage - Webcam
 
+Opening a v4l webcam.
 ```java
 Video4j.init();
 try (VideoStream video = Videos.open(0)) {
@@ -117,7 +118,7 @@ int tileSize = 128;
 int rows = 3;
 int cols = 3;
 PreviewGenerator gen = new PreviewGenerator(tileSize, rows, cols);
-try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
+try (VideoFile video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
     gen.save(video, new File("target/output.jpg"));
 }
 ```
@@ -126,7 +127,7 @@ try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
 
 ```java
 PreviewGenerator gen = new PreviewGenerator(128, 3, 3);
-try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
+try (VideoFile video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
     ImageUtils.show(gen.preview(video));
 }
 ```
