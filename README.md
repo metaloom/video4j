@@ -14,14 +14,14 @@ Video4j is a highlevel library ontop of `org.openpnp:opencv` which provides APIs
 </dependency>
 ```
 
-## Typical Usage
+## Usage - File
 
 ```java
 // Load native lib libopencv_java451
 Video4j.init();
 
 // Open the video
-try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
+try (VideoFile video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
     // Video dimensions
     video.width();
     video.height();
@@ -55,12 +55,25 @@ try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
 }   
 ```
 
-## Streaming of frames
+## Usage - Webcam
+
+```java
+Video4j.init();
+try (VideoStream video = Videos.open(0)) {
+    video.setFrameRate(30);
+    video.enableFormatMJPEG();
+    video.setFormat(320, 240);
+    Stream<VideoFrame> frameStream = video.streamFrames();
+    VideoUtils.showVideoFrameStream(frameStream);
+}
+```
+
+## Usage - Streaming of frames
 
 Stream of raw OpenCV frame matrices.
 ```java
 Video4j.init();
-try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
+try (VideoFile video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
     Stream<Mat> frameStream = video.streamMat()
         .skip(1000)
         .map(CVUtils::faceDetectAndDisplay)

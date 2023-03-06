@@ -3,12 +3,14 @@ package io.metaloom.video4j.impl;
 import java.util.Iterator;
 
 import org.opencv.core.Mat;
+import org.opencv.videoio.VideoWriter;
 
 import io.metaloom.video4j.AbstractVideo;
 import io.metaloom.video4j.Video;
 import io.metaloom.video4j.VideoFrame;
 import io.metaloom.video4j.VideoStream;
 import io.metaloom.video4j.opencv.ExtendedVideoCapture;
+import io.metaloom.video4j.opencv.OpenCV;
 
 /**
  * @see VideoStream
@@ -16,6 +18,7 @@ import io.metaloom.video4j.opencv.ExtendedVideoCapture;
 public class VideoStreamImpl extends AbstractVideo implements VideoStream {
 
 	private int id;
+	private double fps;
 
 	public VideoStreamImpl(int id, ExtendedVideoCapture capture) {
 		super(capture);
@@ -27,6 +30,35 @@ public class VideoStreamImpl extends AbstractVideo implements VideoStream {
 		if (!capture.open(id)) {
 			throw new RuntimeException("Video " + id + " could not be opened.");
 		}
+		// capture.set(OpenCV.CV_CAP_PROP_BUFFERSIZE, 2);
+		// capture.set(OpenCV.CV_CAP_PROP_ZOOM, 21.5f);
+		// capture.set(OpenCV.CV_CAP_PROP_EXPOSURE, 20.9f);
+
+		return this;
+	}
+
+	@Override
+	public VideoStream setFrameRate(double fps) {
+		this.fps = fps;
+		capture.set(OpenCV.CV_CAP_PROP_FPS, fps);
+		return this;
+	}
+
+	@Override
+	public VideoStream setFormat(int width, int height) {
+		capture.set(OpenCV.CV_CAP_PROP_FRAME_WIDTH, width);
+		capture.set(OpenCV.CV_CAP_PROP_FRAME_HEIGHT, height);
+		return this;
+	}
+	
+	@Override
+	public double fps() {
+		return  fps;
+	}
+
+	@Override
+	public VideoStream enableFormatMJPEG() {
+		capture.set(OpenCV.CV_CAP_PROP_FOURCC, VideoWriter.fourcc('M', 'J', 'P', 'G'));
 		return this;
 	}
 

@@ -18,4 +18,28 @@ public interface VideoStream extends Video {
 	 * @return Fluent API
 	 */
 	VideoStream open();
+
+	/**
+	 * Set the desired frame rate.
+	 * 
+	 * @param fps
+	 * @return Fluent API
+	 */
+	VideoStream setFrameRate(double fps);
+
+	/**
+	 * Enable the MJPEG output format of the streaming device.
+	 * 
+	 * @return
+	 */
+	VideoStream enableFormatMJPEG();
+
+	/**
+	 * Set the video format.
+	 * 
+	 * @param width
+	 * @param height
+	 * @return
+	 */
+	VideoStream setFormat(int width, int height);
 }

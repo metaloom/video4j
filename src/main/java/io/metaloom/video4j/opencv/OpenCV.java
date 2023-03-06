@@ -27,12 +27,12 @@ public class OpenCV {
 	// public static final int CV_CAP_PROP_DC1394_MODE_MANUAL = -3;
 	// public static final int CV_CAP_PROP_DC1394_MODE_AUTO = -2;
 	// public static final int CV_CAP_PROP_DC1394_MODE_ONE_PUSH_AUTO = -1;
-	// public static final int CV_CAP_PROP_FOURCC = 6;
+	public static final int CV_CAP_PROP_FOURCC = 6;
 	// public static final int CV_CAP_PROP_FORMAT = 8;
 	// public static final int CV_CAP_PROP_MODE = 9;
 	// public static final int CV_CAP_PROP_HUE = 13;
-	// public static final int CV_CAP_PROP_GAIN = 14;
-	// public static final int CV_CAP_PROP_EXPOSURE = 15;
+	public static final int CV_CAP_PROP_GAIN = 14;
+	public static final int CV_CAP_PROP_EXPOSURE = 15;
 	// public static final int CV_CAP_PROP_CONVERT_RGB = 16;
 	// public static final int CV_CAP_PROP_WHITE_BALANCE_BLUE_U = 17;
 	// public static final int CV_CAP_PROP_RECTIFICATION = 18;
@@ -44,7 +44,7 @@ public class OpenCV {
 	// public static final int CV_CAP_PROP_TRIGGER = 24;
 	// public static final int CV_CAP_PROP_TRIGGER_DELAY = 25;
 	// public static final int CV_CAP_PROP_WHITE_BALANCE_RED_V = 26;
-	// public static final int CV_CAP_PROP_ZOOM = 27;
+	public static final int CV_CAP_PROP_ZOOM = 27;
 	// public static final int CV_CAP_PROP_FOCUS = 28;
 	// public static final int CV_CAP_PROP_GUID = 29;
 	// public static final int CV_CAP_PROP_ISO_SPEED = 30;
@@ -55,7 +55,7 @@ public class OpenCV {
 	// public static final int CV_CAP_PROP_ROLL = 35;
 	// public static final int CV_CAP_PROP_IRIS = 36;
 	// public static final int CV_CAP_PROP_SETTINGS = 37;
-	// public static final int CV_CAP_PROP_BUFFERSIZE = 38;
+	public static final int CV_CAP_PROP_BUFFERSIZE = 38;
 	// public static final int CV_CAP_PROP_AUTOFOCUS = 39;
 	// public static final int CV_CAP_PROP_SAR_NUM = 40;
 	// public static final int CV_CAP_PROP_SAR_DEN = 41;
