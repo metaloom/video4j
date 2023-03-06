@@ -1,7 +1,6 @@
-package io.metaloom.video4j.impl;
+package io.metaloom.video4j;
 
 import java.awt.image.BufferedImage;
-import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Stream;
@@ -9,34 +8,17 @@ import java.util.stream.StreamSupport;
 
 import org.opencv.core.Mat;
 
-import io.metaloom.video4j.Video;
-import io.metaloom.video4j.VideoFrame;
+import io.metaloom.video4j.impl.MatProvider;
 import io.metaloom.video4j.opencv.ExtendedVideoCapture;
 import io.metaloom.video4j.utils.ImageUtils;
 
-public class VideoImpl implements Video {
+public abstract class AbstractVideo implements Video {
 
-	private final String path;
-	private final ExtendedVideoCapture capture;
-	private Object meta;
+	protected final ExtendedVideoCapture capture;
+	protected Object meta;
 
-	public VideoImpl(String path, ExtendedVideoCapture capture) {
-		this.path = path;
+	public AbstractVideo(ExtendedVideoCapture capture) {
 		this.capture = capture;
-	}
-
-	public Video open() {
-		if (!capture.open(path)) {
-			throw new RuntimeException("Video " + path + " could not be opened.");
-		}
-		return this;
-	}
-
-	@Override
-	public void close() {
-		if (capture.isOpened()) {
-			capture.release();
-		}
 	}
 
 	@Override
@@ -48,23 +30,6 @@ public class VideoImpl implements Video {
 	public double fps() {
 		assertOpen();
 		return capture.fps();
-	}
-
-	@Override
-	public long currentFrame() {
-		assertOpen();
-		return capture.currentFrame();
-	}
-
-	@Override
-	public long length() {
-		assertOpen();
-		return capture.totalFrames();
-	}
-
-	@Override
-	public String path() {
-		return path;
 	}
 
 	@Override
@@ -88,17 +53,6 @@ public class VideoImpl implements Video {
 	@Override
 	public <T> void setMeta(T meta) {
 		this.meta = meta;
-	}
-
-	@Override
-	public void seekToFrame(long frame) {
-		assertOpen();
-		capture.seekToFrame(frame);
-	}
-
-	@Override
-	public void seekToFrameRatio(double factor) {
-		capture.seekToFrameRatio(factor);
 	}
 
 	@Override
@@ -155,64 +109,6 @@ public class VideoImpl implements Video {
 		return frame;
 	}
 
-	private void assertOpen() {
-		if (!capture.isOpened()) {
-			throw new RuntimeException("Video has not yet been opened.");
-		}
-	}
-
-	@Override
-	public String toString() {
-		return "Video: " + path() + " Open: " + (isOpen() ? "yes" : "no");
-	}
-
-	@Override
-	public Iterator<Mat> iterator() {
-		long total = length();
-		Iterator<Mat> it = new Iterator<Mat>() {
-
-			@Override
-			public boolean hasNext() {
-				return currentFrame() < total;
-			}
-
-			@Override
-			public Mat next() {
-				return frameToMat();
-			}
-
-			@Override
-			public void remove() {
-				throw new UnsupportedOperationException();
-			}
-		};
-		return it;
-	}
-
-	@Override
-	public Iterator<VideoFrame> videoFrameIterator() {
-		long total = length();
-		Video vid = this;
-		Iterator<VideoFrame> it = new Iterator<VideoFrame>() {
-
-			@Override
-			public boolean hasNext() {
-				return currentFrame() < total;
-			}
-
-			@Override
-			public VideoFrame next() {
-				return new VideoFrameImpl(vid, currentFrame(), frameToMat());
-			}
-
-			@Override
-			public void remove() {
-				throw new UnsupportedOperationException();
-			}
-		};
-		return it;
-	}
-
 	@Override
 	public Stream<Mat> streamMat() {
 		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator(), Spliterator.ORDERED), false)
@@ -236,4 +132,18 @@ public class VideoImpl implements Video {
 				}
 			});
 	}
+
+	@Override
+	public void close() {
+		if (capture.isOpened()) {
+			capture.release();
+		}
+	}
+
+	protected void assertOpen() {
+		if (!capture.isOpened()) {
+			throw new RuntimeException("Video has not yet been opened.");
+		}
+	}
+
 }

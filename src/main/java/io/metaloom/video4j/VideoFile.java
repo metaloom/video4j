@@ -1,34 +1,53 @@
 package io.metaloom.video4j;
 
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-
-public interface VideoFile {
+/**
+ * Video which is backed by a file.
+ */
+public interface VideoFile extends Video {
 
 	/**
-	 * Return the name of the file.
+	 * Open the video using the provided path.
+	 * 
+	 * @param path
+	 * @return
+	 */
+	static VideoFile open(String path) {
+		return Videos.open(path);
+	}
+
+	/**
+	 * Return the filesystem path for the video.
 	 * 
 	 * @return
 	 */
-	String fileName();
+	String path();
 
 	/**
-	 * Generate a thumbnail with the given width.
+	 * Seek to the given position in the video.
 	 * 
-	 * @param width
-	 * @return
-	 * @throws IOException
+	 * @param frame
 	 */
-	BufferedImage getThumbnail(int width) throws IOException;
+	void seekToFrame(long frame);
 
 	/**
-	 * Size in bytes of the video file.
+	 * Seek to the frame which corresponds to the provided percentage factor of the total frames.
+	 * 
+	 * @param factor
+	 */
+	void seekToFrameRatio(double factor);
+
+	/**
+	 * Open the video.
+	 * 
+	 * @return Fluent API
+	 */
+	VideoFile open();
+
+	/**
+	 * Return the amount of total frame of this video.
 	 * 
 	 * @return
 	 */
-	long size();
+	long length();
 
-	String getHash512();
-
-	String getFingerprint();
 }

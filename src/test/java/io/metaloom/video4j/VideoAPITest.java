@@ -16,8 +16,8 @@ public class VideoAPITest extends AbstractVideoTest {
 	@SuppressWarnings("resource")
 	public void testAPI() throws Exception {
 
-		Video v;
-		try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
+		VideoFile v;
+		try (VideoFile video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
 			assertEquals(320, video.width());
 			assertEquals(240, video.height());
 			assertEquals(24, video.fps(), 0);
@@ -34,8 +34,8 @@ public class VideoAPITest extends AbstractVideoTest {
 
 	@Test
 	public void testMultiOpen() throws Exception {
-		Video video1 = Videos.open(BIG_BUCK_BUNNY2_PATH);
-		Video video2 = Videos.open(BIG_BUCK_BUNNY_PATH);
+		VideoFile video1 = Videos.open(BIG_BUCK_BUNNY2_PATH);
+		VideoFile video2 = Videos.open(BIG_BUCK_BUNNY_PATH);
 
 		video1.seekToFrame(1020);
 		BufferedImage image1 = video1.frameToImage();

@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.metaloom.video4j.Video;
+import io.metaloom.video4j.VideoFile;
 import io.metaloom.video4j.VideoFrame;
 import io.metaloom.video4j.opencv.CVUtils;
 import io.metaloom.video4j.ui.MediaPreviewPanel;
@@ -48,7 +49,6 @@ public class SimpleVideoPlayer {
 		int x = (Toolkit.getDefaultToolkit().getScreenSize().width / 4) + windowXOffset.getAndAdd(512);
 		int y = (Toolkit.getDefaultToolkit().getScreenSize().height / 4);
 		window.setLocation(x, y);
-
 	}
 
 	public void show() {
@@ -75,8 +75,11 @@ public class SimpleVideoPlayer {
 		}
 
 		boolean resizeRequired = video.width() != width || video.height() != height;
-		log.info("Playing video: " + video.path());
-		long len = video.length();
+		log.info("Playing video: " + video);
+		long len = Long.MAX_VALUE;
+		if (video instanceof VideoFile vf) {
+			len = vf.length();
+		}
 		double fps = video.fps();
 		log.info("Target size: " + width + " x " + height + " @ " + String.format("%.2f", fps) + " fps");
 		long startFrame = video.currentFrame();
@@ -94,7 +97,11 @@ public class SimpleVideoPlayer {
 				applySyncDelay(start, fps);
 			}
 			if (loop) {
-				video.seekToFrame(startFrame);
+				if (video instanceof VideoFile vf) {
+					vf.seekToFrame(startFrame);
+				} else {
+					log.error("Looping is only supported for video files");
+				}
 			} else {
 				break;
 			}

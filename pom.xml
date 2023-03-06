@@ -10,13 +10,13 @@
 	<parent>
 		<groupId>io.metaloom</groupId>
 		<artifactId>maven-parent</artifactId>
-		<version>1.0.0</version>
+		<version>2.0.1</version>
 	</parent>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<imgscalr-lib.version>4.2</imgscalr-lib.version>
-		<twelvemonkeys.version>3.3.2</twelvemonkeys.version>
+		<twelvemonkeys.version>3.9.4</twelvemonkeys.version>
 	</properties>
 
 	<dependencies>
