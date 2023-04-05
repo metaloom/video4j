@@ -14,7 +14,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import io.metaloom.video4j.Video;
+import io.metaloom.video4j.VideoFile;
 import io.metaloom.video4j.Videos;
 import io.metaloom.video4j.preview.PreviewGenerator;
 
@@ -59,7 +59,7 @@ public class PreviewDebugUI {
 		ImageIcon playButtonIcon = createImageIcon("/images/play.gif");
 		JButton playButton = new JButton("Play", playButtonIcon);
 		playButton.addActionListener(event -> {
-			try (Video video = Videos.open(path)) {
+			try (VideoFile video = Videos.open(path)) {
 				for (PreviewGenerator handler : handlers) {
 					handler.preview(video, image -> refresh(handler, image));
 				}

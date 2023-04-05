@@ -8,24 +8,6 @@ import org.opencv.core.Mat;
 
 public interface Video extends AutoCloseable, Iterable<Mat> {
 
-	static Video open(String path) {
-		return Videos.open(path);
-	}
-
-	/**
-	 * Seek to the given position in the video.
-	 * 
-	 * @param frame
-	 */
-	void seekToFrame(long frame);
-
-	/**
-	 * Seek to the frame which corresponds to the provided percentage factor of the total frames.
-	 * 
-	 * @param factor
-	 */
-	void seekToFrameRatio(double factor);
-
 	/**
 	 * Read the current frame and return it as a buffered image. This operation will advance the position to the next frame.
 	 * 
@@ -100,25 +82,11 @@ public interface Video extends AutoCloseable, Iterable<Mat> {
 	double fps();
 
 	/**
-	 * Open the video.
-	 * 
-	 * @return Fluent API
-	 */
-	Video open();
-
-	/**
 	 * Check whether the video has been opened.
 	 * 
 	 * @return
 	 */
 	boolean isOpen();
-
-	/**
-	 * Return the amount of total frame of this video.
-	 * 
-	 * @return
-	 */
-	long length();
 
 	/**
 	 * Return the height of this video in pixels.
@@ -133,13 +101,6 @@ public interface Video extends AutoCloseable, Iterable<Mat> {
 	 * @return
 	 */
 	int width();
-
-	/**
-	 * Return the filesystem path for the video.
-	 * 
-	 * @return
-	 */
-	String path();
 
 	/**
 	 * Return metadata for the video.

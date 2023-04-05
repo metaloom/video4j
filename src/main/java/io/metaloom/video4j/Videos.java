@@ -1,8 +1,7 @@
 package io.metaloom.video4j;
 
-import java.io.File;
-
-import io.metaloom.video4j.impl.VideoImpl;
+import io.metaloom.video4j.impl.VideoFileImpl;
+import io.metaloom.video4j.impl.VideoStreamImpl;
 import io.metaloom.video4j.opencv.ExtendedVideoCapture;
 
 public final class Videos {
@@ -16,16 +15,26 @@ public final class Videos {
 	 * @param path
 	 * @return
 	 */
-	public static Video get(String path) {
-		if (!new File(path).exists()) {
-			throw new RuntimeException("Could find file {" + path + "}");
-		}
+	public static VideoFile get(String path) {
 		ExtendedVideoCapture capture2 = new ExtendedVideoCapture();
-		return new VideoImpl(path, capture2);
+		return new VideoFileImpl(path, capture2);
 	}
 
-	public static Video open(String path) {
+	public static VideoFile open(String path) {
 		return get(path).open();
+	}
+
+	/**
+	 * Open the video stream using the v4l device index.
+	 * 
+	 * @param index
+	 * @return
+	 */
+	public static VideoStream open(int index) {
+		ExtendedVideoCapture capture2 = new ExtendedVideoCapture();
+		VideoStream stream = new VideoStreamImpl(index, capture2);
+		stream.open();
+		return stream;
 	}
 
 }

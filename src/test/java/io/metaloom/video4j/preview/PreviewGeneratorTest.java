@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import io.metaloom.video4j.AbstractVideoTest;
 import io.metaloom.video4j.Video;
+import io.metaloom.video4j.VideoFile;
 import io.metaloom.video4j.Videos;
 import io.metaloom.video4j.impl.MatProvider;
 import io.metaloom.video4j.utils.ImageUtils;
@@ -22,7 +23,7 @@ public class PreviewGeneratorTest extends AbstractVideoTest {
 		MatProvider.enableTracking();
 		File dest = new File("target/output.jpg");
 		PreviewGenerator gen = new PreviewGenerator(TILE_SIZE, 3, 3);
-		try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
+		try (VideoFile video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
 			gen.save(video, dest);
 		}
 		MatProvider.printLeaks();
@@ -33,7 +34,7 @@ public class PreviewGeneratorTest extends AbstractVideoTest {
 	public void testPreview() {
 		MatProvider.enableTracking();
 		PreviewGenerator gen = new PreviewGenerator(TILE_SIZE, 6, 3);
-		try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
+		try (VideoFile video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
 			ImageUtils.show(gen.preview(video));
 		}
 		sleep(250);
@@ -45,7 +46,7 @@ public class PreviewGeneratorTest extends AbstractVideoTest {
 	public void testVVSPreview() {
 		MatProvider.enableTracking();
 		PreviewGenerator gen = new PreviewGenerator(TILE_SIZE, 6, 3);
-		try (Video video = Videos.open(BIG_BUCK_BUNNY_VVS_PATH)) {
+		try (VideoFile video = Videos.open(BIG_BUCK_BUNNY_VVS_PATH)) {
 			ImageUtils.show(gen.preview(video));
 		}
 		sleep(250);

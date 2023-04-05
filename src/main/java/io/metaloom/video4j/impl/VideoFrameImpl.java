@@ -8,6 +8,9 @@ import io.metaloom.video4j.Video;
 import io.metaloom.video4j.VideoFrame;
 import io.metaloom.video4j.utils.ImageUtils;
 
+/**
+ * @see VideoFrame
+ */
 public class VideoFrameImpl implements VideoFrame {
 
 	private final Video video;

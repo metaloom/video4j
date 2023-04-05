@@ -16,7 +16,7 @@ import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.metaloom.video4j.Video;
+import io.metaloom.video4j.VideoFile;
 import io.metaloom.video4j.impl.MatProvider;
 import io.metaloom.video4j.opencv.CVUtils;
 import io.metaloom.video4j.utils.ImageUtils;
@@ -41,11 +41,11 @@ public class PreviewGenerator {
 		this.rows = rows;
 	}
 
-	public BufferedImage preview(Video video) {
+	public BufferedImage preview(VideoFile video) {
 		return preview(video, null);
 	}
 
-	public BufferedImage preview(Video video, PreviewHandler handler) {
+	public BufferedImage preview(VideoFile video, PreviewHandler handler) {
 		log.debug("Starting Test");
 
 		if (!video.isOpen()) {
@@ -149,7 +149,7 @@ public class PreviewGenerator {
 		return rowList;
 	}
 
-	public void save(Video video, File outputFile) throws IOException {
+	public void save(VideoFile video, File outputFile) throws IOException {
 		BufferedImage image = preview(video);
 		ImageUtils.save(outputFile, image);
 	}
