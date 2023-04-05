@@ -8,7 +8,6 @@ import java.io.IOException;
 import org.junit.Test;
 
 import io.metaloom.video4j.AbstractVideoTest;
-import io.metaloom.video4j.Video;
 import io.metaloom.video4j.VideoFile;
 import io.metaloom.video4j.Videos;
 import io.metaloom.video4j.impl.MatProvider;
