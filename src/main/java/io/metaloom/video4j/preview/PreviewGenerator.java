@@ -46,8 +46,6 @@ public class PreviewGenerator {
 	}
 
 	public BufferedImage preview(VideoFile video, PreviewHandler handler) {
-		log.debug("Starting Test");
-
 		if (!video.isOpen()) {
 			throw new RuntimeException("Video has not yet been opened. " + video);
 		}
