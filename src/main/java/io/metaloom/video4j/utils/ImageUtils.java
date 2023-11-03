@@ -1,6 +1,5 @@
 package io.metaloom.video4j.utils;
 
-import java.awt.FlowLayout;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -13,9 +12,6 @@ import javax.imageio.ImageWriter;
 import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 
 import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Method;
@@ -32,33 +28,27 @@ public final class ImageUtils {
 
 	}
 
-	public static void show(Mat mat) {
-		show(CVUtils.matToBufferedImage(mat));
+	public static SimpleImageViewer show(Mat mat) {
+		return new SimpleImageViewer().show(mat);
 	}
 
-	public static void show(Mat mat, int width) {
-		BufferedImage image = CVUtils.matToBufferedImage(mat);
-		image = Scalr.resize(image, Method.SPEED, width);
-		show(image);
+	public static SimpleImageViewer show(Mat mat, int width) {
+		return new SimpleImageViewer().show(mat, width);
 	}
 
 	/**
 	 * Show a scaled version of the provided image.
 	 * 
 	 * @param image
-	 *            ^ * @param width New width of the image to be shown
+	 * @param width
+	 *            New width of the image to be shown
 	 */
-	public static void show(BufferedImage image, int width) {
-		image = Scalr.resize(image, Method.SPEED, width);
-		show(image);
+	public static SimpleImageViewer show(BufferedImage image, int width) {
+		return new SimpleImageViewer().show(image, width);
 	}
 
-	public static void show(BufferedImage image) {
-		JFrame frame = new JFrame();
-		frame.getContentPane().setLayout(new FlowLayout());
-		frame.getContentPane().add(new JLabel(new ImageIcon(image)));
-		frame.pack();
-		frame.setVisible(true);
+	public static SimpleImageViewer show(BufferedImage image) {
+		return new SimpleImageViewer().show(image);
 	}
 
 	public static void save(File outputPath, BufferedImage image) throws IOException {

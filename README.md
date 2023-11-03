@@ -10,7 +10,7 @@ Video4j is a highlevel library ontop of `org.openpnp:opencv` which provides APIs
 <dependency>
   <groupId>io.metaloom.video</groupId>
   <artifactId>video4j</artifactId>
-  <version>1.3.0</version>
+  <version>1.4.0-SNAPSHOT</version>
 </dependency>
 ```
 

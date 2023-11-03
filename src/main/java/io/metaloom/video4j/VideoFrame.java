@@ -28,6 +28,20 @@ public interface VideoFrame extends AutoCloseable {
 	BufferedImage toImage();
 
 	/**
+	 * Height of the frame.
+	 * 
+	 * @return
+	 */
+	int height();
+
+	/**
+	 * Width of the frame.
+	 * 
+	 * @return
+	 */
+	int width();
+
+	/**
 	 * Return the source video of the frame.
 	 * 
 	 * @return

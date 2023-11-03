@@ -3,6 +3,7 @@ package io.metaloom.video4j.opencv;
 import java.awt.AlphaComposite;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
@@ -148,9 +149,7 @@ public final class CVUtils {
 		Imgproc.resize(step1, step2, new Size(x, y), 0, 0, Imgproc.INTER_LANCZOS4);
 	}
 
-	public static boolean boxFrame2(VideoFrame vframe, int resX) {
-		// return boxFrame2(frame.mat(), resX);
-
+	public static void resize(VideoFrame vframe, int resX) {
 		Mat frame = vframe.mat();
 		int width = frame.width();
 		int height = frame.height();
@@ -161,7 +160,31 @@ public final class CVUtils {
 		boolean vvs = ratio < 1;
 		int resY = vvs ? (int) (((double) resX) * ratio) : (int) (((double) resX) / ratio);
 
-		int spaceY = (resX - resY) / 2;
+		Mat target = null;
+		if (vvs) {
+			target = new Mat(resX, resY, frame.type());
+			resize(frame, target, resY, resX);
+			free(frame);
+		} else {
+			target = new Mat(resY, resX, frame.type());
+			resize(frame, target, resX, resY);
+			free(frame);
+		}
+		vframe.setMat(target);
+
+	}
+
+	public static boolean boxFrame2(VideoFrame vframe, int resX) {
+		Mat frame = vframe.mat();
+		int width = frame.width();
+		int height = frame.height();
+
+		double ratio = (double) width / (double) height;
+
+		// Check for vertical video syndrome
+		boolean vvs = ratio < 1;
+		int resY = vvs ? (int) (((double) resX) * ratio) : (int) (((double) resX) / ratio);
+
 		Mat target = null;
 		if (vvs) {
 			target = new Mat(resX, resY, frame.type());
@@ -171,8 +194,9 @@ public final class CVUtils {
 			target = new Mat(resY, resX, frame.type());
 			resize2(frame, target, resX, resY);
 			free(frame);
-
 		}
+
+		int spaceY = (resX - resY) / 2;
 		Core.copyMakeBorder(target, target, spaceY, spaceY, 0, 0, Core.BORDER_CONSTANT);
 		vframe.setMat(target);
 
@@ -344,11 +368,16 @@ public final class CVUtils {
 	 *            Start point of the crop
 	 * @param dim
 	 *            Dimension of crop area
+	 * @param padding
 	 * @return
 	 */
-	public static VideoFrame crop(VideoFrame frame, java.awt.Point start, Dimension dim) {
+	public static VideoFrame crop(VideoFrame frame, java.awt.Point start, Dimension dim, int padding) {
 		Mat mat = frame.mat();
-		Imgproc.getRectSubPix(mat, new Size(dim.getWidth(), dim.getHeight()),
+		int halfPedding = 0;
+		if (padding > 0) {
+			halfPedding = padding / 2;
+		}
+		Imgproc.getRectSubPix(mat, new Size(dim.getWidth() + halfPedding, dim.getHeight() + halfPedding),
 			new Point(start.x + (dim.getWidth() / 2), start.y + (dim.getHeight() / 2)), mat);
 		return frame;
 	}
@@ -563,7 +592,7 @@ public final class CVUtils {
 	}
 
 	/**
-	 * Convert a {@link Point} back into {@link org.opencv.core.Point}
+	 * Convert a {@link Point} back into {@link org.opencv.core.Point}.
 	 * 
 	 * @param awtPoint
 	 * @return
@@ -573,13 +602,23 @@ public final class CVUtils {
 	}
 
 	/**
-	 * Convert an OpenCV {@link Point} back to {@link java.awt.Point}n
+	 * Convert an OpenCV {@link Point} back to {@link java.awt.Point}.
 	 * 
 	 * @param cvPoint
 	 * @return
 	 */
 	public static java.awt.Point toAWTPoint(Point cvPoint) {
 		return new java.awt.Point((int) cvPoint.x, (int) cvPoint.y);
+	}
+
+	/**
+	 * Convert an OpenCV {@link Rect} back to {@link Rectangle}.
+	 * 
+	 * @param cvRect
+	 * @return
+	 */
+	public static Rectangle toRectangle(Rect cvRect) {
+		return new Rectangle(cvRect.x, cvRect.y, cvRect.width, cvRect.height);
 	}
 
 }

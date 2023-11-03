@@ -9,6 +9,7 @@ import java.util.stream.StreamSupport;
 import org.opencv.core.Mat;
 
 import io.metaloom.video4j.impl.MatProvider;
+import io.metaloom.video4j.impl.VideoFrameImpl;
 import io.metaloom.video4j.opencv.ExtendedVideoCapture;
 import io.metaloom.video4j.utils.ImageUtils;
 
@@ -78,6 +79,11 @@ public abstract class AbstractVideo implements Video {
 	}
 
 	@Override
+	public VideoFrame frame() {
+		return new VideoFrameImpl(this, currentFrame(), frameToMat());
+	}
+
+	@Override
 	public BufferedImage frameToImage(int width, int height) {
 		assertOpen();
 		Mat frame = MatProvider.mat();
@@ -112,25 +118,25 @@ public abstract class AbstractVideo implements Video {
 	@Override
 	public Stream<Mat> streamMat() {
 		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator(), Spliterator.ORDERED), false)
-			.onClose(() -> {
-				try {
-					close();
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
+				.onClose(() -> {
+					try {
+						close();
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
 	}
 
 	@Override
 	public Stream<VideoFrame> streamFrames() {
 		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(videoFrameIterator(), Spliterator.ORDERED), false)
-			.onClose(() -> {
-				try {
-					close();
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
+				.onClose(() -> {
+					try {
+						close();
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
 	}
 
 	@Override

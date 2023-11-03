@@ -31,6 +31,13 @@ public interface Video extends AutoCloseable, Iterable<Mat> {
 	boolean frame(Mat mat);
 
 	/**
+	 * Return the next frame.
+	 * 
+	 * @return
+	 */
+	VideoFrame frame();
+
+	/**
 	 * Read the current frame and return it as a resized buffered image. This operation will advance the position to the next frame.
 	 * 
 	 * @param width

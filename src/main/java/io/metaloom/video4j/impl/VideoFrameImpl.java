@@ -25,6 +25,16 @@ public class VideoFrameImpl implements VideoFrame {
 	}
 
 	@Override
+	public int width() {
+		return frame.width();
+	}
+
+	@Override
+	public int height() {
+		return frame.height();
+	}
+
+	@Override
 	public Video origin() {
 		return video;
 	}
