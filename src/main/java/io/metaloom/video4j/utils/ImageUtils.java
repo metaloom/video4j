@@ -13,8 +13,6 @@ import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
 
-import org.imgscalr.Scalr;
-import org.imgscalr.Scalr.Method;
 import org.opencv.core.Mat;
 
 import io.metaloom.video4j.opencv.CVUtils;

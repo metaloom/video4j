@@ -1,5 +1,7 @@
 package io.metaloom.video4j;
 
+import java.nio.file.Path;
+
 import io.metaloom.video4j.impl.VideoFileImpl;
 import io.metaloom.video4j.impl.VideoStreamImpl;
 import io.metaloom.video4j.opencv.ExtendedVideoCapture;
@@ -18,6 +20,10 @@ public final class Videos {
 	public static VideoFile get(String path) {
 		ExtendedVideoCapture capture2 = new ExtendedVideoCapture();
 		return new VideoFileImpl(path, capture2);
+	}
+
+	public static VideoFile open(Path path) {
+		return get(path.toAbsolutePath().toString()).open();
 	}
 
 	public static VideoFile open(String path) {

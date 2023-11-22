@@ -114,8 +114,12 @@ public final class CVUtils {
 	}
 
 	public static Mat blur(Mat origin) {
+		return blur(origin, new Dimension(20, 20), new java.awt.Point(-1, -1));
+	}
+
+	public static Mat blur(Mat origin, Dimension kernelSize, java.awt.Point anchor) {
 		Mat blured = MatProvider.mat();
-		Imgproc.blur(origin, blured, new Size(20, 20), new Point(15, 15));
+		Imgproc.blur(origin, blured, toCVSize(kernelSize), toCVPoint(anchor));
 		return blured;
 	}
 
@@ -274,6 +278,7 @@ public final class CVUtils {
 	 */
 	public static Mat canny(Mat frame, double threshold1, double threshold2) {
 		Mat grayFrame = MatProvider.mat();
+		// Convert to grayscale
 		Imgproc.cvtColor(frame, grayFrame, Imgproc.COLOR_RGB2GRAY);
 		Mat edges = MatProvider.mat();
 		Imgproc.Canny(grayFrame, edges, threshold1, threshold2);
@@ -480,22 +485,28 @@ public final class CVUtils {
 	}
 
 	/**
-	 * Convert to greyscale.
+	 * Convert to grayscale.
 	 * 
 	 * @param frame
 	 * @return
 	 */
-	public static Mat toGreyScale(Mat frame) {
-		toGreyScale(frame, frame);
-		return frame;
+	public static Mat toGrayScale(Mat mat) {
+		toGrayScale(mat, mat);
+		return mat;
 	}
 
-	public static void toGreyScale(Mat src, Mat dst) {
+	public static Mat toBGR(Mat mat) {
+		Mat mat2 = MatProvider.mat();
+		Imgproc.cvtColor(mat, mat2, Imgproc.COLOR_GRAY2BGR);
+		return mat2;
+	}
+
+	public static void toGrayScale(Mat src, Mat dst) {
 		Imgproc.cvtColor(src, dst, Imgproc.COLOR_RGB2GRAY);
 	}
 
-	public static VideoFrame toGreyScale(VideoFrame frame) {
-		frame.setMat(toGreyScale(frame.mat()));
+	public static VideoFrame toGrayScale(VideoFrame frame) {
+		frame.setMat(toGrayScale(frame.mat()));
 		return frame;
 	}
 
@@ -599,6 +610,16 @@ public final class CVUtils {
 	 */
 	public static org.opencv.core.Point toCVPoint(java.awt.Point awtPoint) {
 		return new org.opencv.core.Point(awtPoint.getX(), awtPoint.getY());
+	}
+
+	/**
+	 * Convert a {@link Dimension} into a {@link Size}.
+	 * 
+	 * @param dim
+	 * @return
+	 */
+	public static Size toCVSize(Dimension dim) {
+		return new Size(dim.getWidth(), dim.getHeight());
 	}
 
 	/**
