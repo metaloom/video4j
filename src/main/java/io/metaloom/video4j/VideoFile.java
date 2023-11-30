@@ -1,5 +1,7 @@
 package io.metaloom.video4j;
 
+import java.nio.file.Path;
+
 /**
  * Video which is backed by a file.
  */
@@ -12,6 +14,16 @@ public interface VideoFile extends Video {
 	 * @return
 	 */
 	static VideoFile open(String path) {
+		return Videos.open(path);
+	}
+
+	/**
+	 * Open the video using the provided path.
+	 * 
+	 * @param path
+	 * @return
+	 */
+	static VideoFile open(Path path) {
 		return Videos.open(path);
 	}
 

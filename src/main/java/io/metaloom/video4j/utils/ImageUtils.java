@@ -2,7 +2,9 @@ package io.metaloom.video4j.utils;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Iterator;
 
 import javax.imageio.IIOImage;
@@ -10,7 +12,6 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
-import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
 
 import org.opencv.core.Mat;
@@ -49,15 +50,20 @@ public final class ImageUtils {
 		return new SimpleImageViewer().show(image);
 	}
 
-	public static void save(File outputPath, BufferedImage image) throws IOException {
-		try (ImageOutputStream out = new FileImageOutputStream(outputPath)) {
-			ImageWriteParam params = getImageWriteparams();
-
-			Iterator<ImageWriter> jpgWriters = ImageIO.getImageWritersByFormatName("jpg");
-			ImageWriter writer = jpgWriters.next();
-			writer.setOutput(out);
-			writer.write(null, new IIOImage(image, null, null), params);
+	public static void saveJPG(File outputPath, BufferedImage image) throws IOException {
+		try (FileOutputStream fos = new FileOutputStream(outputPath)) {
+			saveJPG(fos, image);
 		}
+	}
+
+	public static void saveJPG(OutputStream os, BufferedImage image) throws IOException {
+		ImageOutputStream out = ImageIO.createImageOutputStream(os);
+		ImageWriteParam params = getImageWriteparams();
+
+		Iterator<ImageWriter> jpgWriters = ImageIO.getImageWritersByFormatName("jpg");
+		ImageWriter writer = jpgWriters.next();
+		writer.setOutput(out);
+		writer.write(null, new IIOImage(image, null, null), params);
 	}
 
 	public static BufferedImage load(File imageFile) throws IOException {

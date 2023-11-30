@@ -3,6 +3,7 @@ package io.metaloom.video4j.preview;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,9 +24,9 @@ import io.metaloom.video4j.utils.ImageUtils;
 
 public class PreviewGenerator {
 
-	private static long SEEK_OFFSET = 6000;
-
 	private static Logger log = LoggerFactory.getLogger(PreviewGenerator.class.getName());
+
+	private static long SEEK_OFFSET = 6000;
 
 	private final int cols;
 
@@ -149,7 +150,12 @@ public class PreviewGenerator {
 
 	public void save(VideoFile video, File outputFile) throws IOException {
 		BufferedImage image = preview(video);
-		ImageUtils.save(outputFile, image);
+		ImageUtils.saveJPG(outputFile, image);
+	}
+
+	public void save(VideoFile video, OutputStream os) throws IOException {
+		BufferedImage image = preview(video);
+		ImageUtils.saveJPG(os, image);
 	}
 
 }
