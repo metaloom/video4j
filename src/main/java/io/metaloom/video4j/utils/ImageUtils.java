@@ -1,10 +1,12 @@
 package io.metaloom.video4j.utils;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
 import javax.imageio.IIOImage;
@@ -79,6 +81,18 @@ public final class ImageUtils {
 
 	public static BufferedImage matToBufferedImage(Mat frame) {
 		return CVUtils.matToBufferedImage(frame);
+	}
+
+	public static String toBase64JPG(BufferedImage image) throws IOException {
+		if (image == null) {
+			return null;
+		}
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		try (Base64OutputStream base64OutputStream = new Base64OutputStream(byteArrayOutputStream)) {
+			ImageUtils.saveJPG(base64OutputStream, image);
+		}
+		System.out.println();
+		return byteArrayOutputStream.toString(StandardCharsets.UTF_8);
 	}
 
 }

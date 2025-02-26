@@ -32,6 +32,13 @@ public class ImageUtilsTest {
 		assertTrue(imgFile.exists());
 	}
 
+	@Test
+	public void testImage2Base64JPG() throws IOException {
+		BufferedImage img = createTestImage();
+		String base64Image = ImageUtils.toBase64JPG(img);
+		System.out.println(base64Image);
+	}
+
 	private BufferedImage createTestImage() {
 		BufferedImage img = new BufferedImage(200, 200, BufferedImage.TYPE_3BYTE_BGR);
 		Graphics g = img.getGraphics();
