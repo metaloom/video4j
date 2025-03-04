@@ -5,8 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.stream.Stream;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.opencv.core.Mat;
 
 import io.metaloom.video4j.opencv.CVUtils;
@@ -59,7 +59,8 @@ public class ExampleUsageTest extends AbstractVideoTest {
 	}
 
 	@Test
-	@Ignore("This example only works with webcam connected.")
+	//@Ignore("This example only works with webcam connected.")
+	@Disabled
 	public void testWebcamUsage() {
 		// SNIPPET START webcamUsage
 		Video4j.init();
@@ -114,7 +115,7 @@ public class ExampleUsageTest extends AbstractVideoTest {
 
 	@Test
 	public void testStreamUsage2() {
-		// SNIPPET START streamUsage2
+		// SNIPPET START streamUsage2	
 		Video4j.init();
 		try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
 			Stream<VideoFrame> frameStream = video.streamFrames()

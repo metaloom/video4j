@@ -1,11 +1,11 @@
 package io.metaloom.video4j.preview;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.File;
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.metaloom.video4j.AbstractVideoTest;
 import io.metaloom.video4j.VideoFile;
@@ -26,7 +26,7 @@ public class PreviewGeneratorTest extends AbstractVideoTest {
 			gen.save(video, dest);
 		}
 		MatProvider.printLeaks();
-		assertFalse("There should not be any leaked mats", MatProvider.hasLeaks());
+		assertFalse(MatProvider.hasLeaks(), "There should not be any leaked mats");
 	}
 
 	@Test
@@ -38,7 +38,7 @@ public class PreviewGeneratorTest extends AbstractVideoTest {
 		}
 		sleep(250);
 		MatProvider.printLeaks();
-		assertFalse("There should not be any leaked mats", MatProvider.hasLeaks());
+		assertFalse( MatProvider.hasLeaks(), "There should not be any leaked mats");
 	}
 
 	@Test
@@ -50,6 +50,6 @@ public class PreviewGeneratorTest extends AbstractVideoTest {
 		}
 		sleep(250);
 		MatProvider.printLeaks();
-		assertFalse("There should not be any leaked mats", MatProvider.hasLeaks());
+		assertFalse(MatProvider.hasLeaks(),"There should not be any leaked mats");
 	}
 }

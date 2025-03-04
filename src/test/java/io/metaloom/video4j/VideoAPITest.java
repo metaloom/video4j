@@ -1,12 +1,12 @@
 package io.metaloom.video4j;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.image.BufferedImage;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.metaloom.video4j.utils.ImageUtils;
 
@@ -24,11 +24,11 @@ public class VideoAPITest extends AbstractVideoTest {
 			video.seekToFrame(1020);
 			BufferedImage image = video.frameToImage();
 			ImageUtils.show(image);
-			assertTrue("Video should be open", video.isOpen());
+			assertTrue(video.isOpen(), "Video should be open");
 			v = video;
 		}
 
-		assertFalse("Video should have been closed", v.isOpen());
+		assertFalse(v.isOpen(), "Video should have been closed");
 		sleep(2000);
 	}
 
@@ -45,8 +45,8 @@ public class VideoAPITest extends AbstractVideoTest {
 		BufferedImage image2 = video2.frameToImage();
 		ImageUtils.show(image2);
 
-		assertTrue("Video should still be open", video1.isOpen());
-		assertTrue("Video should still be open", video2.isOpen());
+		assertTrue(video1.isOpen(), "Video should still be open");
+		assertTrue(video2.isOpen(), "Video should still be open");
 		sleep(2000);
 	}
 }

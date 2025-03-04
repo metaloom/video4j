@@ -58,6 +58,11 @@ public class VideoFileImpl extends AbstractVideo implements VideoFile {
 	}
 
 	@Override
+	public double fps() {
+		return capture.fps();
+	}
+
+	@Override
 	public String toString() {
 		return "Video: " + path() + " Open: " + (isOpen() ? "yes" : "no");
 	}

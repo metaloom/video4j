@@ -14,6 +14,7 @@ import java.util.Random;
 import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Method;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
@@ -114,7 +115,11 @@ public final class CVUtils {
 	}
 
 	public static Mat blur(Mat origin) {
-		return blur(origin, new Dimension(20, 20), new java.awt.Point(-1, -1));
+		return blur(origin, 20);
+	}
+
+	public static Mat blur(Mat origin, int factor) {
+		return blur(origin, new Dimension(factor, factor), new java.awt.Point(-1, -1));
 	}
 
 	public static Mat blur(Mat origin, Dimension kernelSize, java.awt.Point anchor) {
@@ -365,6 +370,12 @@ public final class CVUtils {
 		return resizedImage;
 	}
 
+	public static VideoFrame crop(VideoFrame frame, java.awt.Point start, Dimension dim, int padding) {
+		Mat mat = frame.mat();
+		crop(mat, start, dim, padding);
+		return frame;
+	}
+
 	/**
 	 * Crop the given frame area.
 	 * 
@@ -376,15 +387,13 @@ public final class CVUtils {
 	 * @param padding
 	 * @return
 	 */
-	public static VideoFrame crop(VideoFrame frame, java.awt.Point start, Dimension dim, int padding) {
-		Mat mat = frame.mat();
+	public static void crop(Mat mat, java.awt.Point start, Dimension dim, int padding) {
 		int halfPedding = 0;
 		if (padding > 0) {
 			halfPedding = padding / 2;
 		}
 		Imgproc.getRectSubPix(mat, new Size(dim.getWidth() + halfPedding, dim.getHeight() + halfPedding),
 			new Point(start.x + (dim.getWidth() / 2), start.y + (dim.getHeight() / 2)), mat);
-		return frame;
 	}
 
 	public static VideoFrame faceDetectAndDisplay(VideoFrame frame) {
@@ -640,6 +649,26 @@ public final class CVUtils {
 	 */
 	public static Rectangle toRectangle(Rect cvRect) {
 		return new Rectangle(cvRect.x, cvRect.y, cvRect.width, cvRect.height);
+	}
+
+	public static double blurriness(VideoFrame frame) {
+		return blurriness(frame.mat());
+	}
+
+	public static double blurriness(Mat mat) {
+		Mat laplacian = MatProvider.mat();
+		Imgproc.Laplacian(mat, laplacian, CvType.CV_64F);
+
+		Mat laplacianSquared = MatProvider.mat();
+		Core.multiply(laplacian, laplacian, laplacianSquared);
+
+		Mat gnorm = MatProvider.mat();
+		Core.sqrt(laplacianSquared, gnorm);
+
+		Scalar meanSharpness = Core.mean(gnorm); // np.average(gnorm)
+		double sharpness = meanSharpness.val[0];
+
+		return sharpness;
 	}
 
 }

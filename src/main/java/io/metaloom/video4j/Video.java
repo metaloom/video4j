@@ -82,7 +82,7 @@ public interface Video extends AutoCloseable, Iterable<Mat> {
 	long currentFrame();
 
 	/**
-	 * Return the frame-per-second rate of the video.
+	 * Return the frame-per-second rate of the video media.
 	 * 
 	 * @return
 	 */

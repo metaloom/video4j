@@ -5,9 +5,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
+import java.util.Objects;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -70,6 +72,12 @@ public final class ImageUtils {
 
 	public static BufferedImage load(File imageFile) throws IOException {
 		return ImageIO.read(imageFile);
+	}
+
+	public static BufferedImage loadResource(String path) throws IOException {
+		InputStream ins = ImageUtils.class.getResourceAsStream(path);
+		Objects.requireNonNull(ins, "The image for " + path + " could not be found.");
+		return ImageIO.read(ins);
 	}
 
 	private static ImageWriteParam getImageWriteparams() {

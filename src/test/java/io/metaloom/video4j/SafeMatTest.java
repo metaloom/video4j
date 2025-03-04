@@ -1,9 +1,9 @@
 package io.metaloom.video4j;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.metaloom.video4j.impl.MatProvider;
 import io.metaloom.video4j.impl.SafeMat;

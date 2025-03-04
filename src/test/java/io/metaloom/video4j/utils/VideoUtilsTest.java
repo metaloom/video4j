@@ -1,6 +1,6 @@
 package io.metaloom.video4j.utils;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.metaloom.video4j.AbstractVideoTest;
 import io.metaloom.video4j.Video;

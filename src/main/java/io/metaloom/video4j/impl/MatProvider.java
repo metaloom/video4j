@@ -1,11 +1,13 @@
 package io.metaloom.video4j.impl;
 
+import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 
 public class MatProvider {
 
@@ -15,6 +17,19 @@ public class MatProvider {
 
 	public static Mat mat() {
 		Mat mat = new Mat();
+		track(mat);
+		return mat;
+	}
+
+	/**
+	 * Provide a mat that has the size of the image. The data will not be copied from the image.
+	 * 
+	 * @param image
+	 * @param type
+	 * @return
+	 */
+	public static Mat mat(BufferedImage image, int type) {
+		Mat mat = Mat.zeros(new Size(image.getWidth(), image.getHeight()), type);
 		track(mat);
 		return mat;
 	}
@@ -53,4 +68,5 @@ public class MatProvider {
 	public static void disableTracking() {
 		tracking = true;
 	}
+
 }

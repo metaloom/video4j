@@ -1,11 +1,11 @@
 package io.metaloom.video4j;
 
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeEach;
 
 public class AbstractVideoTest {
 
-	@BeforeClass
-	public static void setup() {
+	@BeforeEach
+	public void setup() {
 		Video4j.init();
 	}
 
