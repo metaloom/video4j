@@ -18,7 +18,10 @@ import javax.imageio.ImageWriter;
 import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
 import javax.imageio.stream.ImageOutputStream;
 
+import org.imgscalr.Scalr;
 import org.opencv.core.Mat;
+
+import com.twelvemonkeys.image.ResampleOp;
 
 import io.metaloom.video4j.opencv.CVUtils;
 
@@ -80,13 +83,6 @@ public final class ImageUtils {
 		return ImageIO.read(ins);
 	}
 
-	private static ImageWriteParam getImageWriteparams() {
-		JPEGImageWriteParam params = new JPEGImageWriteParam(null);
-		params.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-		params.setCompressionQuality(0.95f);
-		return params;
-	}
-
 	public static BufferedImage matToBufferedImage(Mat frame) {
 		return CVUtils.matToBufferedImage(frame);
 	}
@@ -99,8 +95,30 @@ public final class ImageUtils {
 		try (Base64OutputStream base64OutputStream = new Base64OutputStream(byteArrayOutputStream)) {
 			ImageUtils.saveJPG(base64OutputStream, image);
 		}
-		System.out.println();
 		return byteArrayOutputStream.toString(StandardCharsets.UTF_8);
+	}
+
+	/**
+	 * Resize the image to the matching dimensions.
+	 * 
+	 * @param image
+	 * @param x
+	 *            new width of the image
+	 * @param y
+	 *            new height of the image
+	 * @return
+	 */
+	public static BufferedImage scale(BufferedImage image, int x, int y) {
+		BufferedImage resizedImage = Scalr.apply(image, new ResampleOp(x, y, ResampleOp.FILTER_POINT));
+		resizedImage.flush();
+		return resizedImage;
+	}
+
+	private static ImageWriteParam getImageWriteparams() {
+		JPEGImageWriteParam params = new JPEGImageWriteParam(null);
+		params.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+		params.setCompressionQuality(0.95f);
+		return params;
 	}
 
 }

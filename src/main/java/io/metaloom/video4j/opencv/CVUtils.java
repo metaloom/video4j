@@ -25,8 +25,6 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.objdetect.Objdetect;
 
-import com.twelvemonkeys.image.ResampleOp;
-
 import io.metaloom.video4j.VideoFrame;
 import io.metaloom.video4j.impl.MatProvider;
 
@@ -354,22 +352,6 @@ public final class CVUtils {
 		return cannyColor;
 	}
 
-	/**
-	 * Resize the image to the matching dimensions.
-	 * 
-	 * @param image
-	 * @param x
-	 *            new width of the image
-	 * @param y
-	 *            new height of the image
-	 * @return
-	 */
-	public static BufferedImage scale(BufferedImage image, int x, int y) {
-		BufferedImage resizedImage = Scalr.apply(image, new ResampleOp(x, y, ResampleOp.FILTER_POINT));
-		resizedImage.flush();
-		return resizedImage;
-	}
-
 	public static VideoFrame crop(VideoFrame frame, java.awt.Point start, Dimension dim, int padding) {
 		Mat mat = frame.mat();
 		crop(mat, start, dim, padding);
@@ -392,8 +374,35 @@ public final class CVUtils {
 		if (padding > 0) {
 			halfPedding = padding / 2;
 		}
-		Imgproc.getRectSubPix(mat, new Size(dim.getWidth() + halfPedding, dim.getHeight() + halfPedding),
-			new Point(start.x + (dim.getWidth() / 2), start.y + (dim.getHeight() / 2)), mat);
+
+		Size size = new Size(dim.getWidth() + halfPedding, dim.getHeight() + halfPedding);
+		Point center = new Point(start.x + (dim.getWidth() / 2), start.y + (dim.getHeight() / 2));
+		Imgproc.getRectSubPix(mat, size, center, mat);
+	}
+
+	public static Mat crop2(Mat mat, java.awt.Point start, Dimension dim, int padding) {
+		int halfPedding = 0;
+		if (padding > 0) {
+			halfPedding = padding / 2;
+		}
+		int startX = start.x - halfPedding;
+		if (startX <= 0) {
+			startX = 1;
+		}
+		int startY = start.y - halfPedding;
+		if (startY <= 0) {
+			startY = 1;
+		}
+		int width = dim.width + padding;
+		if (startX + width > mat.width()) {
+			width = mat.width() - startX;
+		}
+		int height = dim.height + padding;
+		if (startY + height > mat.height()) {
+			height = mat.height() - startY;
+		}
+		Rect roi = new Rect(startX, startY, width, height);
+		return mat.submat(roi);
 	}
 
 	public static VideoFrame faceDetectAndDisplay(VideoFrame frame) {
