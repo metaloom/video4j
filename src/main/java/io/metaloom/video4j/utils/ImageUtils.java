@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Objects;
@@ -119,6 +120,13 @@ public final class ImageUtils {
 		params.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
 		params.setCompressionQuality(0.95f);
 		return params;
+	}
+
+	public static BufferedImage loadJPG(ByteBuffer buffer) throws IOException {
+		try (InputStream ins = new ByteBufferBackedInputStream(buffer)) {
+			BufferedImage img = ImageIO.read(ins);
+			return img;
+		}
 	}
 
 }
