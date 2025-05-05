@@ -68,8 +68,11 @@ public abstract class AbstractVideo implements Video {
 	public Mat frameToMat() {
 		assertOpen();
 		Mat frame = MatProvider.mat();
-		capture.read(frame);
-		return frame;
+		if (capture.read(frame)) {
+			return frame;
+		} else {
+			return null;
+		}
 	}
 
 	@Override
@@ -80,7 +83,12 @@ public abstract class AbstractVideo implements Video {
 
 	@Override
 	public VideoFrame frame() {
-		return new VideoFrameImpl(this, currentFrame(), frameToMat());
+		Mat mat = frameToMat();
+		if (mat != null) {
+			return new VideoFrameImpl(this, currentFrame(), mat);
+		} else {
+			return null;
+		}
 	}
 
 	@Override
@@ -118,25 +126,25 @@ public abstract class AbstractVideo implements Video {
 	@Override
 	public Stream<Mat> streamMat() {
 		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator(), Spliterator.ORDERED), false)
-				.onClose(() -> {
-					try {
-						close();
-					} catch (Exception e) {
-						throw new RuntimeException(e);
-					}
-				});
+			.onClose(() -> {
+				try {
+					close();
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
 	}
 
 	@Override
 	public Stream<VideoFrame> streamFrames() {
 		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(videoFrameIterator(), Spliterator.ORDERED), false)
-				.onClose(() -> {
-					try {
-						close();
-					} catch (Exception e) {
-						throw new RuntimeException(e);
-					}
-				});
+			.onClose(() -> {
+				try {
+					close();
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
 	}
 
 	@Override

@@ -67,6 +67,11 @@ public class VideoFrameImpl implements VideoFrame {
 	}
 
 	@Override
+	public String toString() {
+		return "VideoFrame[" + number() + "] " + frame.width() + "x" + frame.height();
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getMeta() {
 		return (T) meta;

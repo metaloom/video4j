@@ -158,6 +158,11 @@ public final class CVUtils {
 
 	public static void resize(VideoFrame vframe, int resX) {
 		Mat frame = vframe.mat();
+		Mat target = resize(frame, resX);
+		vframe.setMat(target);
+	}
+
+	public static Mat resize(Mat frame, int resX) {
 		int width = frame.width();
 		int height = frame.height();
 
@@ -177,7 +182,7 @@ public final class CVUtils {
 			resize(frame, target, resX, resY);
 			free(frame);
 		}
-		vframe.setMat(target);
+		return target;
 
 	}
 
