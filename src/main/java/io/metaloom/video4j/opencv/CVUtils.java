@@ -539,10 +539,15 @@ public final class CVUtils {
 		Core.normalize(step1, step2, clamp, max - clamp, Core.NORM_MINMAX);
 	}
 
+	public static <T extends VideoFrame> T drawText(T frame, String text, Point pos, double fontScale, Scalar color, int thickness) {
+		drawText(frame.mat(), text, pos, fontScale, color, thickness);
+		return frame;
+	}
+
 	/**
-	 * Draw some text on the frame.
+	 * Draw some text on the mat.
 	 * 
-	 * @param frame
+	 * @param mat
 	 * @param text
 	 * @param pos
 	 *            Origin from top left
@@ -551,9 +556,8 @@ public final class CVUtils {
 	 * @param thickness
 	 * @return Fluent API
 	 */
-	public static <T extends VideoFrame> T drawText(T frame, String text, Point pos, double fontScale, Scalar color, int thickness) {
-		Imgproc.putText(frame.mat(), text, pos, Imgproc.FONT_HERSHEY_PLAIN, fontScale, color, thickness);
-		return frame;
+	public static void drawText(Mat mat, String text, Point pos, double fontScale, Scalar color, int thickness) {
+		Imgproc.putText(mat, text, pos, Imgproc.FONT_HERSHEY_PLAIN, fontScale, color, thickness);
 	}
 
 	public static boolean boxFrame(VideoFrame frame, int resX) {
@@ -669,6 +673,12 @@ public final class CVUtils {
 		return blurriness(frame.mat());
 	}
 
+	/**
+	 * Calculate the blurriness of the image by using an laplacian operator.
+	 * 
+	 * @param mat
+	 * @return
+	 */
 	public static double blurriness(Mat mat) {
 		Mat laplacian = MatProvider.mat();
 		Imgproc.Laplacian(mat, laplacian, CvType.CV_64F);
@@ -683,6 +693,11 @@ public final class CVUtils {
 		double sharpness = meanSharpness.val[0];
 
 		return sharpness;
+	}
+
+	public static void drawRect(Mat imageMat, int x, int y, int w, int h) {
+		Rect rec = new Rect(x, y, w, h);
+		Imgproc.rectangle(imageMat, rec, Scalar.all(1), 2);
 	}
 
 }
