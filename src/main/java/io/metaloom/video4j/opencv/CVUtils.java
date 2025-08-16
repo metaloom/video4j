@@ -700,4 +700,16 @@ public final class CVUtils {
 		Imgproc.rectangle(imageMat, rec, Scalar.all(1), 2);
 	}
 
+	public static void drawRect(Mat imageMat, int x, int y, int w, int h, Scalar color) {
+		Rect rec = new Rect(x, y, w, h);
+		Imgproc.rectangle(imageMat, rec, color, 2);
+	}
+
+	public static void drawCircle(Mat imageMat, int x, int y, int radius, Scalar color) {
+		Point center = new Point(x, y);
+		int thickness = 1;
+		int lineType = Imgproc.LINE_4;
+		Imgproc.circle(imageMat, center, radius, color, thickness, lineType);
+	}
+
 }
