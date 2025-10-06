@@ -10,7 +10,7 @@
     <parent>
         <groupId>io.metaloom</groupId>
         <artifactId>maven-parent</artifactId>
-        <version>2.0.1</version>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -70,8 +70,7 @@
         <!-- Test -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.12.0</version>
+            <artifactId>junit-jupiter-api</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -86,7 +85,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>3.3.1</version>
                 <inherited>false</inherited>
                 <executions>
                     <execution>
