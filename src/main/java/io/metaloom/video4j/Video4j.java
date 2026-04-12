@@ -1,11 +1,15 @@
 package io.metaloom.video4j;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.opencv.core.Core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Video4j {
 
-	public static final Logger log = LoggerFactory.getLogger(Video4j.class);
+	public static final Logger logger = LoggerFactory.getLogger(Video4j.class);
 
 	private static String getDebianNativeLibraryName() {
 		return "opencv_java4100";
@@ -19,35 +23,43 @@ public class Video4j {
 	 * Load the needed native library.
 	 */
 	public static void init() {
-		// 1. Try to load lib via configured library paths
-		Throwable error;
-		try {
-			// Currently 4.9.0
-			System.loadLibrary(org.opencv.core.Core.NATIVE_LIBRARY_NAME);
-			return;
-		} catch (Throwable t) {
-			error = t;
+		Throwable error = loadLibWithFallback();
+		if (error != null) {
+			logger.error(
+				"Failed to init OpenCV JNI. You may not have the correct JNI library on your library path. You may be able to solve this issue by setting -Djava.library.path=/usr/lib/jni and ensuring that libopencv4.6-jni or libopencv4.10-jni have been installed.",
+				error);
+			throw new RuntimeException(error);
 		}
 
-		// 2. Try to load the lib via the default debian path
-		try {
-			// Currently 4.6.0
-			System.load("/usr/lib/jni/lib" + getDebianOldNativeLibraryName() + ".so");
-			return;
-		} catch (Throwable t) {
+	}
+
+	private static Throwable loadLibWithFallback() {
+		List<String> libList = new ArrayList<>();
+		List.of(org.opencv.core.Core.NATIVE_LIBRARY_NAME);
+		libList.add("/usr/lib/jni/lib" + getDebianOldNativeLibraryName() + ".so");
+		libList.add("/usr/lib/jni/lib" + getDebianNativeLibraryName() + ".so");
+
+		Throwable lastError = null;
+		boolean warn = false;
+		for (String lib : libList) {
 			try {
-				// Finally try currently 4.10.0 - risky but sill compatibile in most cases
-				System.load("/usr/lib/jni/lib" + getDebianNativeLibraryName() + ".so");
-				return;
-			} catch (Throwable t2) {
-				error = t2;
+				logger.info("Trying to load: " + lib);
+				if (lib.contains("/")) {
+					System.load(lib);
+				} else {
+					System.loadLibrary(lib);
+				}
+				return null;
+			} catch (Throwable t) {
+				lastError = t;
+				warn = true;
 			}
-		}
 
-		log.error(
-			"Failed to init OpenCV JNI. You may not have the correct JNI library on your library path. You may be able to solve this issue by setting -Djava.library.path=/usr/lib/jni and ensuring that libopencv4.6-jni or libopencv4.10-jni have been installed.",
-			error);
-		throw new RuntimeException(error);
+		}
+		if (warn == true) {
+			logger.warn("Loaded not fully supported library for opencv. Make sure your env has " + Core.NATIVE_LIBRARY_NAME);
+		}
+		return lastError;
 	}
 
 }
