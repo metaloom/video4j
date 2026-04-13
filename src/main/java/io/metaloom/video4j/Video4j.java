@@ -15,10 +15,6 @@ public class Video4j {
 		return "opencv_java4100";
 	}
 
-	private static String getDebianOldNativeLibraryName() {
-		return "opencv_java460";
-	}
-
 	/**
 	 * Load the needed native library.
 	 */
@@ -35,8 +31,7 @@ public class Video4j {
 
 	private static Throwable loadLibWithFallback() {
 		List<String> libList = new ArrayList<>();
-		List.of(org.opencv.core.Core.NATIVE_LIBRARY_NAME);
-		libList.add("/usr/lib/jni/lib" + getDebianOldNativeLibraryName() + ".so");
+		libList.add(org.opencv.core.Core.NATIVE_LIBRARY_NAME);
 		libList.add("/usr/lib/jni/lib" + getDebianNativeLibraryName() + ".so");
 
 		Throwable lastError = null;
