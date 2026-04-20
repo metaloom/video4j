@@ -100,6 +100,7 @@ public class ExampleUsageTest extends AbstractVideoTest {
 	}
 
 	@Test
+	@Disabled("Streaming tests require a display / webcam")
 	public void testStreamUsage() {
 		// SNIPPET START streamUsage
 		Video4j.init();
@@ -114,6 +115,7 @@ public class ExampleUsageTest extends AbstractVideoTest {
 	}
 
 	@Test
+	@Disabled("Streaming tests require a display / webcam")
 	public void testStreamUsage2() {
 		// SNIPPET START streamUsage2	
 		Video4j.init();
