@@ -10,7 +10,7 @@ Video4j is a highlevel library ontop of `org.openpnp:opencv` which provides APIs
 <dependency>
   <groupId>io.metaloom.video</groupId>
   <artifactId>video4j</artifactId>
-  <version>1.4.0-SNAPSHOT</version>
+  <version>2.0.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -78,7 +78,7 @@ Video4j.init();
 try (VideoFile video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
   Stream<Mat> frameStream = video.streamMat()
     .skip(1000)
-    .map(CVUtils::faceDetectAndDisplay)
+    .map(CVUtils::toGrayScale)
     .map(frame -> CVUtils.canny(frame, 50, 300));
   VideoUtils.showMatStream(frameStream);
 }
@@ -95,8 +95,8 @@ try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
     // Only process every 10th frame
     .filter(frame -> frame.number() % 10 == 0)
 
-    // Apply face detection
-    .map(CVUtils::faceDetectAndDisplay)
+    // Apply grayscale conversion
+    .map(CVUtils::toGrayScale)
 
     // Apply the canny filter for edge detection
     .map(frame -> CVUtils.canny(frame, 50, 300));
