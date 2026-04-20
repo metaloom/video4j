@@ -6,7 +6,7 @@ import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.opencv.core.Mat;
+import io.metaloom.opencv.core.Mat;
 
 import io.metaloom.video4j.impl.MatProvider;
 import io.metaloom.video4j.impl.VideoFrameImpl;

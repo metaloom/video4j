@@ -2,8 +2,8 @@ package io.metaloom.video4j.impl;
 
 import java.util.Iterator;
 
-import org.opencv.core.Mat;
-import org.opencv.videoio.VideoWriter;
+import io.metaloom.opencv.core.Mat;
+import io.metaloom.opencv.videoio.Videoio;
 
 import io.metaloom.video4j.AbstractVideo;
 import io.metaloom.video4j.Video;
@@ -58,7 +58,7 @@ public class VideoStreamImpl extends AbstractVideo implements VideoStream {
 
 	@Override
 	public VideoStream enableFormatMJPEG() {
-		capture.set(OpenCV.CV_CAP_PROP_FOURCC, VideoWriter.fourcc('M', 'J', 'P', 'G'));
+		capture.set(OpenCV.CV_CAP_PROP_FOURCC, Videoio.fourcc('M', 'J', 'P', 'G'));
 		return this;
 	}
 

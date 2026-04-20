@@ -13,17 +13,14 @@ import java.util.Random;
 
 import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Method;
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfRect;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.objdetect.CascadeClassifier;
-import org.opencv.objdetect.Objdetect;
+import io.metaloom.opencv.core.Core;
+import io.metaloom.opencv.core.CvType;
+import io.metaloom.opencv.core.Mat;
+import io.metaloom.opencv.core.Point;
+import io.metaloom.opencv.core.Rect;
+import io.metaloom.opencv.core.Scalar;
+import io.metaloom.opencv.core.Size;
+import io.metaloom.opencv.imgproc.Imgproc;
 
 import io.metaloom.video4j.VideoFrame;
 import io.metaloom.video4j.impl.MatProvider;
@@ -122,7 +119,7 @@ public final class CVUtils {
 
 	public static Mat blur(Mat origin, Dimension kernelSize, java.awt.Point anchor) {
 		Mat blured = MatProvider.mat();
-		Imgproc.blur(origin, blured, toCVSize(kernelSize), toCVPoint(anchor));
+		Imgproc.blur(origin, blured, toCVSize(kernelSize), toCVPoint(anchor), Core.BORDER_DEFAULT);
 		return blured;
 	}
 
@@ -410,77 +407,6 @@ public final class CVUtils {
 		return mat.submat(roi);
 	}
 
-	public static VideoFrame faceDetectAndDisplay(VideoFrame frame) {
-		frame.setMat(faceDetectAndDisplay(frame.mat()));
-		return frame;
-	}
-
-	/**
-	 * Run basic face detection and draw detected faces into the image.
-	 * 
-	 * @param frame
-	 * @return
-	 */
-	public static Mat faceDetectAndDisplay(Mat frame) {
-		MatOfRect faces = new MatOfRect();
-		Mat grayFrame = MatProvider.mat();
-		CascadeClassifier faceCascade = new CascadeClassifier();
-		String profileXML = "src/main/resources/lbpcascade_profileface.xml";
-		if (!faceCascade.load(profileXML)) {
-			throw new RuntimeException("Could not load " + profileXML);
-		}
-		// convert the frame in gray scale
-		Imgproc.cvtColor(frame, grayFrame, Imgproc.COLOR_BGR2GRAY);
-		// equalize the frame histogram to improve the result
-		// Imgproc.equalizeHist(grayFrame, grayFrame);
-
-		int absoluteFaceSize = 0;
-		// Compute minimum face size (20% of the frame height, in our case)
-		if (absoluteFaceSize == 0) {
-			int height = grayFrame.rows();
-			if (Math.round(height * 0.2f) > 0) {
-				absoluteFaceSize = Math.round(height * 0.2f);
-			}
-		}
-
-		// Detect faces
-		faceCascade.detectMultiScale(grayFrame, faces, 1.1, 2, 0 | Objdetect.CASCADE_SCALE_IMAGE,
-			new Size(absoluteFaceSize, absoluteFaceSize), new Size());
-
-		// Draw rectangle around the faces
-		Rect[] facesArray = faces.toArray();
-		for (int i = 0; i < facesArray.length; i++) {
-			Imgproc.rectangle(frame, facesArray[i].tl(), facesArray[i].br(), new Scalar(0, 255, 0), 3);
-		}
-		return frame;
-
-	}
-
-	public static VideoFrame faceDetectAndDisplay2(VideoFrame frame) {
-		frame.setMat(faceDetectAndDisplay2(frame.mat()));
-		return frame;
-	}
-
-	public static Mat faceDetectAndDisplay2(Mat frame) {
-		CascadeClassifier faceDetector = new CascadeClassifier();
-		String profileXML = "src/main/resources/haarcascade_frontalface_alt.xml";
-		if (!faceDetector.load(profileXML)) {
-			throw new RuntimeException("Could not load " + profileXML);
-		}
-
-		// Detecting faces
-		MatOfRect faceDetections = new MatOfRect();
-		faceDetector.detectMultiScale(frame, faceDetections);
-
-		// Creating a rectangular box showing faces detected
-		for (Rect rect : faceDetections.toArray()) {
-			Imgproc.rectangle(frame, new Point(rect.x, rect.y), new Point(rect.width + rect.x,
-				rect.height + rect.y), new Scalar(0, 255, 0));
-		}
-		return frame;
-
-	}
-
 	/**
 	 * Create a new mat which has the same dimensions as the source.
 	 * 
@@ -615,7 +541,7 @@ public final class CVUtils {
 	public static void clear(Mat mat, double value) {
 		for (int x = 0; x < mat.width(); x++) {
 			for (int y = 0; y < mat.height(); y++) {
-				mat.put(x, y, value);
+				mat.put(x, y, new double[] { value });
 			}
 		}
 	}
@@ -630,13 +556,13 @@ public final class CVUtils {
 	}
 
 	/**
-	 * Convert a {@link Point} back into {@link org.opencv.core.Point}.
+	 * Convert a {@link Point} back into {@link io.metaloom.opencv.core.Point}.
 	 * 
 	 * @param awtPoint
 	 * @return
 	 */
-	public static org.opencv.core.Point toCVPoint(java.awt.Point awtPoint) {
-		return new org.opencv.core.Point(awtPoint.getX(), awtPoint.getY());
+	public static io.metaloom.opencv.core.Point toCVPoint(java.awt.Point awtPoint) {
+		return new io.metaloom.opencv.core.Point(awtPoint.getX(), awtPoint.getY());
 	}
 
 	/**
@@ -708,8 +634,7 @@ public final class CVUtils {
 	public static void drawCircle(Mat imageMat, int x, int y, int radius, Scalar color) {
 		Point center = new Point(x, y);
 		int thickness = 1;
-		int lineType = Imgproc.LINE_4;
-		Imgproc.circle(imageMat, center, radius, color, thickness, lineType);
+		Imgproc.circle(imageMat, center, radius, color, thickness);
 	}
 
 }

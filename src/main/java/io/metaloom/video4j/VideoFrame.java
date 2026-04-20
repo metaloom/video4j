@@ -2,7 +2,7 @@ package io.metaloom.video4j;
 
 import java.awt.image.BufferedImage;
 
-import org.opencv.core.Mat;
+import io.metaloom.opencv.core.Mat;
 
 public interface VideoFrame extends AutoCloseable {
 

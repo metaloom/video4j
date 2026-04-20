@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-import org.opencv.core.Mat;
+import io.metaloom.opencv.core.Mat;
 
 public interface Video extends AutoCloseable, Iterable<Mat> {
 

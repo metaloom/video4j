@@ -2,7 +2,7 @@ package io.metaloom.video4j.impl;
 
 import java.awt.image.BufferedImage;
 
-import org.opencv.core.Mat;
+import io.metaloom.opencv.core.Mat;
 
 import io.metaloom.video4j.Video;
 import io.metaloom.video4j.VideoFrame;

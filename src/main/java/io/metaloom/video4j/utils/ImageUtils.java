@@ -20,7 +20,7 @@ import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
 import javax.imageio.stream.ImageOutputStream;
 
 import org.imgscalr.Scalr;
-import org.opencv.core.Mat;
+import io.metaloom.opencv.core.Mat;
 
 import com.twelvemonkeys.image.ResampleOp;
 

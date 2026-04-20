@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.opencv.core.Mat;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
+import io.metaloom.opencv.core.Mat;
+import io.metaloom.opencv.core.Scalar;
+import io.metaloom.opencv.core.Size;
 
 public class MatProvider {
 
@@ -50,7 +50,7 @@ public class MatProvider {
 	}
 
 	public static Mat empty(Mat source) {
-		Mat mat = new Mat(source.size(), source.type(), Scalar.all(0f));
+		Mat mat = Mat.zeros((int) source.size().height, (int) source.size().width, source.type());
 		track(mat);
 		return mat;
 	}
@@ -66,7 +66,7 @@ public class MatProvider {
 	}
 
 	public static void disableTracking() {
-		tracking = true;
+		tracking = false;
 	}
 
 }

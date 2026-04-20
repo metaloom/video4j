@@ -9,11 +9,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
+import io.metaloom.opencv.core.Core;
+import io.metaloom.opencv.core.Mat;
+import io.metaloom.opencv.core.Point;
+import io.metaloom.opencv.core.Scalar;
+import io.metaloom.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

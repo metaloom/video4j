@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.opencv.core.Mat;
+import io.metaloom.opencv.core.Mat;
 
 import io.metaloom.video4j.opencv.CVUtils;
 import io.metaloom.video4j.preview.PreviewGenerator;
@@ -106,7 +106,7 @@ public class ExampleUsageTest extends AbstractVideoTest {
 		try (VideoFile video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
 			Stream<Mat> frameStream = video.streamMat()
 				.skip(1000)
-				.map(CVUtils::faceDetectAndDisplay)
+				.map(CVUtils::toGrayScale)
 				.map(frame -> CVUtils.canny(frame, 50, 300));
 			VideoUtils.showMatStream(frameStream);
 		}
@@ -125,8 +125,8 @@ public class ExampleUsageTest extends AbstractVideoTest {
 				// Only process every 10th frame
 				.filter(frame -> frame.number() % 10 == 0)
 
-				// Apply face detection
-				.map(CVUtils::faceDetectAndDisplay)
+				// Apply grayscale conversion
+				.map(CVUtils::toGrayScale)
 
 				// Apply the canny filter for edge detection
 				.map(frame -> CVUtils.canny(frame, 50, 300));

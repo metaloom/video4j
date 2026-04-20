@@ -9,7 +9,7 @@ import javax.swing.JLabel;
 
 import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Method;
-import org.opencv.core.Mat;
+import io.metaloom.opencv.core.Mat;
 
 import io.metaloom.video4j.VideoFrame;
 import io.metaloom.video4j.opencv.CVUtils;

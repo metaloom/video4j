@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
+import io.metaloom.opencv.core.Mat;
+import io.metaloom.opencv.imgproc.Imgproc;
 
 import io.metaloom.video4j.AbstractVideoTest;
 import io.metaloom.video4j.impl.MatProvider;

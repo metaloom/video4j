@@ -28,9 +28,9 @@
 
         <!-- Video / Image -->
         <dependency>
-            <groupId>org.openpnp</groupId>
-            <artifactId>opencv</artifactId>
-            <version>4.10.0-0</version>
+            <groupId>io.metaloom.opencv</groupId>
+            <artifactId>opencv-ffm</artifactId>
+            <version>4.10.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.imgscalr</groupId>
@@ -124,6 +124,16 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <release>25</release>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>--enable-native-access=ALL-UNNAMED</argLine>
+                    <environmentVariables>
+                        <LD_LIBRARY_PATH>${project.basedir}/../opencv-ffm/native/build</LD_LIBRARY_PATH>
+                    </environmentVariables>
                 </configuration>
             </plugin>
         </plugins>

@@ -1,19 +1,50 @@
 package io.metaloom.video4j.opencv;
 
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.videoio.VideoCapture;
+import io.metaloom.opencv.core.Core;
+import io.metaloom.opencv.core.Mat;
+import io.metaloom.opencv.core.Size;
+import io.metaloom.opencv.imgproc.Imgproc;
+import io.metaloom.opencv.videoio.VideoCapture;
 
 import io.metaloom.video4j.impl.MatProvider;
 
 /**
- * Extended OpenCV API
+ * Extended OpenCV API wrapping a {@link VideoCapture} via composition.
  */
-public class ExtendedVideoCapture extends VideoCapture {
+public class ExtendedVideoCapture {
+
+	private final VideoCapture delegate;
 
 	public ExtendedVideoCapture() {
+		this.delegate = new VideoCapture();
+	}
+
+	public boolean open(String filename) {
+		return delegate.open(filename);
+	}
+
+	public boolean open(int index) {
+		return delegate.open(index);
+	}
+
+	public boolean isOpened() {
+		return delegate.isOpened();
+	}
+
+	public boolean read(Mat image) {
+		return delegate.read(image);
+	}
+
+	public boolean set(int propId, double value) {
+		return delegate.set(propId, value);
+	}
+
+	public double get(int propId) {
+		return delegate.get(propId);
+	}
+
+	public void release() {
+		delegate.release();
 	}
 
 	public void seekToFrame(long frameCount) {
@@ -48,7 +79,6 @@ public class ExtendedVideoCapture extends VideoCapture {
 	public double totalMs() {
 		long current = currentFrame();
 		seekToFrame(totalFrames());
-		// set(OpenCV.CV_CAP_PROP_POS_AVI_RATIO, 1);
 		double len = get(OpenCV.CV_CAP_PROP_POS_MSEC);
 		seekToFrame(current);
 		return len;

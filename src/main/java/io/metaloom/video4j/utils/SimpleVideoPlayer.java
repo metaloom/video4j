@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 import javax.swing.JFrame;
 
-import org.opencv.core.Mat;
+import io.metaloom.opencv.core.Mat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

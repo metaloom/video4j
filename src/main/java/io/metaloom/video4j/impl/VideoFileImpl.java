@@ -2,7 +2,7 @@ package io.metaloom.video4j.impl;
 
 import java.util.Iterator;
 
-import org.opencv.core.Mat;
+import io.metaloom.opencv.core.Mat;
 
 import io.metaloom.video4j.AbstractVideo;
 import io.metaloom.video4j.Video;

@@ -3,9 +3,9 @@ package io.metaloom.video4j;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
+import io.metaloom.opencv.core.Mat;
+import io.metaloom.opencv.core.Point;
+import io.metaloom.opencv.core.Scalar;
 
 import io.metaloom.video4j.opencv.CVUtils;
 import io.metaloom.video4j.utils.VideoUtils;
@@ -17,7 +17,7 @@ public class VideoFrameStreamTest extends AbstractVideoTest {
 		try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
 			Stream<Mat> frameStream = video.streamMat()
 				.skip(1000)
-				.map(CVUtils::faceDetectAndDisplay)
+				.map(CVUtils::toGrayScale)
 				.map(frame -> CVUtils.canny(frame, 50, 300));
 			VideoUtils.showMatStream(frameStream);
 		}
@@ -60,7 +60,7 @@ public class VideoFrameStreamTest extends AbstractVideoTest {
 			Stream<VideoFrame> frameStream = video.streamFrames()
 				.skip(1000)
 				.filter(frame -> frame.number() % 10 == 0)
-				.map(CVUtils::faceDetectAndDisplay)
+				.map(CVUtils::toGrayScale)
 				.map(frame -> CVUtils.canny(frame, 50, 300));
 			VideoUtils.showVideoFrameStream(frameStream, 256);
 		}
