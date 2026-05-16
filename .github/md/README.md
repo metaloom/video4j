@@ -17,26 +17,26 @@ Video4j is a highlevel library ontop of `org.openpnp:opencv` which provides APIs
 ## Usage - File
 
 ```java
-%{snippet|id=basicUsage|file=src/test/java/io/metaloom/video4j/ExampleUsageTest.java}
+%{snippet|id=basicUsage|file=video4j/src/test/java/io/metaloom/video4j/ExampleUsageTest.java}
 ```
 
 ## Usage - Webcam
 
 Opening a v4l webcam.
 ```java
-%{snippet|id=webcamUsage|file=src/test/java/io/metaloom/video4j/ExampleUsageTest.java}
+%{snippet|id=webcamUsage|file=video4j/src/test/java/io/metaloom/video4j/ExampleUsageTest.java}
 ```
 
 ## Usage - Streaming of frames
 
 Stream of raw OpenCV frame matrices.
 ```java
-%{snippet|id=streamUsage|file=src/test/java/io/metaloom/video4j/ExampleUsageTest.java}
+%{snippet|id=streamUsage|file=video4j/src/test/java/io/metaloom/video4j/ExampleUsageTest.java}
 ```
 
 Stream of `VideoFrame`'s which contain the frame number and video reference.
 ```java
-%{snippet|id=streamUsage2|file=src/test/java/io/metaloom/video4j/ExampleUsageTest.java}
+%{snippet|id=streamUsage2|file=video4j/src/test/java/io/metaloom/video4j/ExampleUsageTest.java}
 ```
 
 ## Preview Image Generation
@@ -50,13 +50,13 @@ Typical output:
 Save preview image to disk
 
 ```java
-%{snippet|id=previewUsage|file=src/test/java/io/metaloom/video4j/ExampleUsageTest.java}
+%{snippet|id=previewUsage|file=video4j/src/test/java/io/metaloom/video4j/ExampleUsageTest.java}
 ```
 
 ... Or just generate a buffered image to be used later on.
 
 ```java
-%{snippet|id=previewUsage2|file=src/test/java/io/metaloom/video4j/ExampleUsageTest.java}
+%{snippet|id=previewUsage2|file=video4j/src/test/java/io/metaloom/video4j/ExampleUsageTest.java}
 ```
 
 ## Utils
