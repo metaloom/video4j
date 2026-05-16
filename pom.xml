@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.metaloom.video</groupId>
-    <artifactId>video4j</artifactId>
+    <artifactId>video4j-parent</artifactId>
     <version>2.0.0-SNAPSHOT</version>
 
     <parent>
@@ -13,11 +13,17 @@
         <version>3.0.0-SNAPSHOT</version>
     </parent>
 
+    <modules>
+        <module>bom</module>
+        <module>facedetect</module>
+        <module>fingerprint</module>
+        <module>fingerprint-indexer</module>
+    </modules>
+
+    <packaging>pom</packaging>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <imgscalr-lib.version>4.2</imgscalr-lib.version>
-        <twelvemonkeys.version>3.9.4</twelvemonkeys.version>
-        <opencv-ffm.version>4.10.0-SNAPSHOT</opencv-ffm.version>
     </properties>
 
     <dependencies>
@@ -25,47 +31,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-        </dependency>
-
-        <!-- Video / Image -->
-        <dependency>
-            <groupId>io.metaloom.opencv</groupId>
-            <artifactId>opencv-ffm</artifactId>
-            <version>${opencv-ffm.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.imgscalr</groupId>
-            <artifactId>imgscalr-lib</artifactId>
-            <version>${imgscalr-lib.version}</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.twelvemonkeys.imageio</groupId>
-            <artifactId>imageio-core</artifactId>
-            <version>${twelvemonkeys.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.twelvemonkeys.imageio</groupId>
-            <artifactId>imageio-jpeg</artifactId>
-            <version>${twelvemonkeys.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.twelvemonkeys.imageio</groupId>
-            <artifactId>imageio-tiff</artifactId>
-            <version>${twelvemonkeys.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.twelvemonkeys.imageio</groupId>
-            <artifactId>imageio-icns</artifactId>
-            <version>${twelvemonkeys.version}</version>
-        </dependency>
-
-        <!-- Utils -->
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.18.0</version>
         </dependency>
 
         <!-- Test -->
@@ -133,7 +98,8 @@
                 <configuration>
                     <argLine>--enable-native-access=ALL-UNNAMED</argLine>
                     <environmentVariables>
-                        <LD_LIBRARY_PATH>${project.basedir}/../opencv-ffm/native/build</LD_LIBRARY_PATH>
+                        <LD_LIBRARY_PATH>
+                            ${project.basedir}/../opencv-ffm/native/build</LD_LIBRARY_PATH>
                     </environmentVariables>
                 </configuration>
             </plugin>

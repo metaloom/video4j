@@ -17,92 +17,23 @@ Video4j is a highlevel library ontop of `org.openpnp:opencv` which provides APIs
 ## Usage - File
 
 ```java
-// Load native lib libopencv_java460
-Video4j.init();
-
-// Open the video
-try (VideoFile video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
-  // Video dimensions
-  video.width();
-  video.height();
-
-  // Configured FPS
-  video.fps();
-
-  // Total frames of the video
-  video.length();
-
-  // Seek to specific frame
-  video.seekToFrame(1020);
-
-  // Or just to the 50% point of the video
-  video.seekToFrameRatio(0.5d);
-
-  // Return the number of the current frame
-  video.currentFrame();
-
-  // Read the next frame as matrice (lower level access)
-  Mat mat = video.frameToMat();
-
-  // Read the next frame as image (mat gets automatically converted to image)
-  BufferedImage image = video.frameToImage();
-
-  // Read the frame and resize it to a width of 256 pixel.
-  BufferedImage image2 = video.boxedFrameToImage(256);
-
-  // Display the frame in a window
-  ImageUtils.show(image);
-```
+Error during retrieving content skip as ignoreDownloadError activated.```
 
 ## Usage - Webcam
 
 Opening a v4l webcam.
 ```java
-Video4j.init();
-
-// Open webcam via v4l device 0
-try (VideoStream video = Videos.open(0)) {
-  video.setFrameRate(30);
-  video.enableFormatMJPEG();
-  video.setFormat(320, 240);
-  Stream<VideoFrame> frameStream = video.streamFrames();
-  VideoUtils.showVideoFrameStream(frameStream);
-}
-```
+Error during retrieving content skip as ignoreDownloadError activated.```
 
 ## Usage - Streaming of frames
 
 Stream of raw OpenCV frame matrices.
 ```java
-Video4j.init();
-try (VideoFile video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
-  Stream<Mat> frameStream = video.streamMat()
-    .skip(1000)
-    .map(CVUtils::toGrayScale)
-    .map(frame -> CVUtils.canny(frame, 50, 300));
-  VideoUtils.showMatStream(frameStream);
-}
-```
+Error during retrieving content skip as ignoreDownloadError activated.```
 
 Stream of `VideoFrame`'s which contain the frame number and video reference.
 ```java
-Video4j.init();
-try (Video video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
-  Stream<VideoFrame> frameStream = video.streamFrames()
-    // Skip the first 1000 frames
-    .skip(1000)
-
-    // Only process every 10th frame
-    .filter(frame -> frame.number() % 10 == 0)
-
-    // Apply grayscale conversion
-    .map(CVUtils::toGrayScale)
-
-    // Apply the canny filter for edge detection
-    .map(frame -> CVUtils.canny(frame, 50, 300));
-  VideoUtils.showVideoFrameStream(frameStream);
-}
-```
+Error during retrieving content skip as ignoreDownloadError activated.```
 
 ## Preview Image Generation
 
@@ -115,23 +46,12 @@ Typical output:
 Save preview image to disk
 
 ```java
-int tileSize = 128;
-int rows = 3;
-int cols = 3;
-PreviewGenerator gen = new PreviewGenerator(tileSize, rows, cols);
-try (VideoFile video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
-  gen.save(video, new File("target/output.jpg"));
-}
-```
+Error during retrieving content skip as ignoreDownloadError activated.```
 
 ... Or just generate a buffered image to be used later on.
 
 ```java
-PreviewGenerator gen = new PreviewGenerator(128, 3, 3);
-try (VideoFile video = Videos.open(BIG_BUCK_BUNNY2_PATH)) {
-  ImageUtils.show(gen.preview(video));
-}
-```
+Error during retrieving content skip as ignoreDownloadError activated.```
 
 ## Utils
 
