@@ -20,7 +20,7 @@
 
         <imgscalr-lib.version>4.2</imgscalr-lib.version>
         <twelvemonkeys.version>3.9.4</twelvemonkeys.version>
-        <opencv-ffm.version>>4.10.0-SNAPSHOT</opencv-ffm.version>
+        <opencv-ffm.version>5.0.0-SNAPSHOT</opencv-ffm.version>
     </properties>
 
     <dependencyManagement>

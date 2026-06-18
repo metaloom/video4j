@@ -20,7 +20,22 @@ public class CVFacedetectorImpl extends AbstractFacedetector implements CVFacede
 /** flag value for CASCADE_SCALE_IMAGE from cv::CascadeClassifier */
 private static final int CASCADE_SCALE_IMAGE = 4;
 
-public static final CascadeClassifier FACE_DETECTOR = new CascadeClassifier();
+/**
+ * Cascade classifier used by this detector.
+ * <p>
+ * NOTE: {@code cv::CascadeClassifier} was removed from OpenCV 5.x. Instantiating
+ * this field will therefore throw {@link UnsupportedOperationException}. The field
+ * is initialised lazily so that the class can still be loaded by unrelated code
+ * paths; only the actual cascade-based methods fail at runtime.
+ */
+private static CascadeClassifier FACE_DETECTOR;
+
+private static CascadeClassifier faceDetector() {
+if (FACE_DETECTOR == null) {
+FACE_DETECTOR = new CascadeClassifier();
+}
+return FACE_DETECTOR;
+}
 
 public CVFacedetectorImpl() {
 }
@@ -39,7 +54,7 @@ loadClassifierProfile(profileXML);
 
 @Override
 public void loadClassifierProfile(String profileXML) {
-if (!FACE_DETECTOR.load(profileXML)) {
+if (!faceDetector().load(profileXML)) {
 throw new RuntimeException("Could not load " + profileXML);
 }
 }
@@ -104,10 +119,10 @@ int absoluteFaceSize = 0;
 if (Math.round(height * minFaceHeightFactor) > 0) {
 absoluteFaceSize = Math.round(height * minFaceHeightFactor);
 }
-detections = FACE_DETECTOR.detectMultiScale(imageMat, 1.1, 2, CASCADE_SCALE_IMAGE,
+detections = faceDetector().detectMultiScale(imageMat, 1.1, 2, CASCADE_SCALE_IMAGE,
 absoluteFaceSize, absoluteFaceSize);
 } else {
-detections = FACE_DETECTOR.detectMultiScale(imageMat);
+detections = faceDetector().detectMultiScale(imageMat);
 }
 
 for (Rect rect : detections) {

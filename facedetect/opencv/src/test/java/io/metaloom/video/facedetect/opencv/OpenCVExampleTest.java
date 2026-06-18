@@ -3,6 +3,7 @@ package io.metaloom.video.facedetect.opencv;
 import java.awt.Point;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import io.metaloom.video.facedetect.FaceVideoFrame;
@@ -14,6 +15,7 @@ import io.metaloom.video4j.Videos;
 import io.metaloom.video4j.opencv.CVUtils;
 import io.metaloom.video4j.utils.VideoUtils;
 
+@Disabled("cv::CascadeClassifier was removed in OpenCV 5.x. This pipeline relies on Haar/LBP cascades which are no longer available.")
 public class OpenCVExampleTest {
 
 	@Test

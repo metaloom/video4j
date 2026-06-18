@@ -1,9 +1,11 @@
 package io.metaloom.video.facedetect.opencv;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import io.metaloom.video.facedetect.AbstractFacedetectUITest;
 
+@Disabled("cv::CascadeClassifier was removed in OpenCV 5.x. This UI test relies on Haar/LBP cascades which are no longer available.")
 public class FacedetectOpenCVUITest extends AbstractFacedetectUITest {
 
 	@Test

@@ -17,7 +17,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <imgscalr-lib.version>4.2</imgscalr-lib.version>
         <twelvemonkeys.version>3.9.4</twelvemonkeys.version>
-        <opencv-ffm.version>4.10.0-SNAPSHOT</opencv-ffm.version>
+        <opencv-ffm.version>5.0.0-SNAPSHOT</opencv-ffm.version>
     </properties>
 
     <dependencies>
@@ -130,10 +130,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.2</version>
                 <configuration>
                     <argLine>--enable-native-access=ALL-UNNAMED</argLine>
                     <environmentVariables>
-                        <LD_LIBRARY_PATH>${project.basedir}/../opencv-ffm/native/build</LD_LIBRARY_PATH>
+                        <LD_LIBRARY_PATH>${project.basedir}/../../opencv-ffm/native/build:${project.basedir}/../../opencv/build/lib:${env.LD_LIBRARY_PATH}</LD_LIBRARY_PATH>
                     </environmentVariables>
                 </configuration>
             </plugin>
