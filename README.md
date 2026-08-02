@@ -195,3 +195,7 @@ mvn clean deploy -Drelease
 jreleaser config
 jreleaser full:release
 ```
+
+## Attribution
+
+Portions of the code in this project were co-authored with the assistance of AI.

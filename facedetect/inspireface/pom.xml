@@ -20,8 +20,8 @@
         </dependency>
 
         <dependency>
-            <groupId>io.metaloom.inspireface4j</groupId>
-            <artifactId>inspireface4j</artifactId>
+            <groupId>io.metaloom.facedetect4j</groupId>
+            <artifactId>facedetect4j-inspireface</artifactId>
             <version>0.1.0-SNAPSHOT</version>
         </dependency>
 
