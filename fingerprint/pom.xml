@@ -18,7 +18,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <video4j.version>2.0.0-SNAPSHOT</video4j.version>
+        <video4j.version>4.10.0-SNAPSHOT</video4j.version>
     </properties>
 
     <dependencies>
