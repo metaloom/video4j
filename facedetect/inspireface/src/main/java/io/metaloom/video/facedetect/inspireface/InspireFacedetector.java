@@ -21,6 +21,11 @@ import io.metaloom.video4j.opencv.CVUtils;
 
 public interface InspireFacedetector extends Facedetector {
 
+	/**
+	 * Default maximum head rotation in degrees. Suits footage shot towards the camera; see {@link #setMaxFaceAngle(float)}.
+	 */
+	float DEFAULT_MAX_FACE_ANGLE = 30f;
+
 	public static final String DEFAULT_PACK_PATH = "packs/Pikachu";
 
 	public static final String ATTR_ANGEL_ROLL = "ROLL";
@@ -104,9 +109,36 @@ public interface InspireFacedetector extends Facedetector {
 
 	/**
 	 * Set the minimum confidence that is accepted for faces. Detected faces below this threshold will be discarded.
-	 * 
+	 *
 	 * @param conf
 	 */
 	public void setMinConf(float conf);
+
+	/**
+	 * Set the maximum head rotation, in degrees, that is accepted for faces detected in a video frame.
+	 *
+	 * <p>
+	 * A face turned further than this on any axis - roll, pitch or yaw - is discarded even when the detector is confident about it. The gate exists
+	 * because a face in profile yields a poor embedding: detection confidence stays high while recognition quality collapses, so score alone is not a
+	 * usable filter.
+	 * </p>
+	 *
+	 * <p>
+	 * It is also the reason a scene of two people talking <em>to each other</em> can report no faces at all. The default of 30 suits footage shot
+	 * towards the camera; a conversation, an interview or anything filmed side-on needs considerably more, and a caller that only wants boxes - with no
+	 * embedding anywhere downstream - can disable the gate entirely by passing a value of 180 or more.
+	 * </p>
+	 *
+	 * @param degrees
+	 *            maximum absolute rotation on any axis; values of 180 or above accept every orientation
+	 */
+	public void setMaxFaceAngle(float degrees);
+
+	/**
+	 * Return the maximum accepted head rotation in degrees.
+	 *
+	 * @return
+	 */
+	public float getMaxFaceAngle();
 
 }

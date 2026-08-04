@@ -33,7 +33,16 @@ public class InspireFacedetectorImpl extends AbstractFacedetector implements Ins
 
 	// TODO make configurable
 	private float miniumConf = 0f;
-	private float maximumFaceAngle = 30;
+
+	/**
+	 * Maximum accepted head rotation, in degrees, on any of roll/pitch/yaw.
+	 *
+	 * <p>
+	 * Applied by {@link #detectFaces(VideoFrame)} only. 30 is a value tuned for footage shot towards the camera and it rejects a great deal else: two
+	 * people talking to each other sit at 40-80 degrees of yaw and are discarded entirely, at full detection confidence.
+	 * </p>
+	 */
+	private float maximumFaceAngle = DEFAULT_MAX_FACE_ANGLE;
 
 	/**
 	 * Create a new facedetector and use the path for detection model pack.
@@ -79,6 +88,16 @@ public class InspireFacedetectorImpl extends AbstractFacedetector implements Ins
 	}
 
 	@Override
+	public void setMaxFaceAngle(float degrees) {
+		this.maximumFaceAngle = degrees;
+	}
+
+	@Override
+	public float getMaxFaceAngle() {
+		return maximumFaceAngle;
+	}
+
+	@Override
 	public FaceVideoFrame detectFaces(VideoFrame frame) {
 		FaceVideoFrame faceFrame = FaceVideoFrame.from(frame);
 		BufferedImage img = frame.toImage();
@@ -100,10 +119,10 @@ public class InspireFacedetectorImpl extends AbstractFacedetector implements Ins
 				continue;
 			}
 
-			if (detection.angles().exceeds(maximumFaceAngle)) {
+			// A value of 180 or above accepts everything, since no axis can rotate further than that.
+			if (maximumFaceAngle < 180f && detection.angles().exceeds(maximumFaceAngle)) {
 				continue;
 			}
-			System.out.println("Conf: " + conf + ", " + detection.angles().delta(maximumFaceAngle));
 
 			// Check if the found face is too small and does not meet the face height threshold.
 			Face face = Face.create(toFaceBox(detection.box()));
