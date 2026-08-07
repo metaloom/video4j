@@ -108,6 +108,29 @@ public interface InspireFacedetector extends Facedetector {
 	}
 
 	/**
+	 * Detect the faces in a still image and, optionally, compute a recognition embedding for each one.
+	 *
+	 * <p>
+	 * The embedding is what makes two detections of the same person comparable; a bounding box alone cannot answer "is this the same face?". Computing
+	 * it costs an extra model pass per face, so it is opt-in - a caller that only wants boxes should not pay for vectors nobody reads.
+	 * </p>
+	 *
+	 * <p>
+	 * <b>Use this rather than pairing {@link #detectFaces(java.awt.image.BufferedImage)} with
+	 * {@link Facedetector#detectEmbeddings(io.metaloom.video4j.VideoFrame)} to get both.</b> {@code detectEmbeddings} deliberately runs unfiltered, so
+	 * its detection ordinals do not line up with the ones {@code detectFaces} returns after applying the minimum-size and minimum-confidence gates.
+	 * Zipping the two lists silently attaches each vector to the wrong face - a failure that produces perfectly plausible output and no error.
+	 * </p>
+	 *
+	 * @param img
+	 *            the image to scan
+	 * @param withEmbeddings
+	 *            whether to compute an embedding per detected face
+	 * @return the detected faces, filtered exactly as {@link #detectFaces(java.awt.image.BufferedImage)} filters them
+	 */
+	public List<? extends Face> detectFaces(java.awt.image.BufferedImage img, boolean withEmbeddings);
+
+	/**
 	 * Set the minimum confidence that is accepted for faces. Detected faces below this threshold will be discarded.
 	 *
 	 * @param conf

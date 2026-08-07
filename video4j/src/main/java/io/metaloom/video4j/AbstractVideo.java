@@ -59,9 +59,12 @@ public abstract class AbstractVideo implements Video {
 	@Override
 	public BufferedImage frameToImage() {
 		assertOpen();
-		Mat frame = MatProvider.mat();
-		capture.read(frame);
-		return ImageUtils.matToBufferedImage(frame);
+		// The decoded Mat exists only to be copied into the BufferedImage. Mat has no cleaner, so it has to be freed here - a caller sampling frames in
+		// a loop would otherwise retain every frame it ever read.
+		try (Mat frame = MatProvider.mat()) {
+			capture.read(frame);
+			return ImageUtils.matToBufferedImage(frame);
+		}
 	}
 
 	@Override
@@ -94,19 +97,21 @@ public abstract class AbstractVideo implements Video {
 	@Override
 	public BufferedImage frameToImage(int width, int height) {
 		assertOpen();
-		Mat frame = MatProvider.mat();
-		if (!capture.read(frame, width, height)) {
-			return null;
+		try (Mat frame = MatProvider.mat()) {
+			if (!capture.read(frame, width, height)) {
+				return null;
+			}
+			return ImageUtils.matToBufferedImage(frame);
 		}
-		return ImageUtils.matToBufferedImage(frame);
 	}
 
 	@Override
 	public BufferedImage boxedFrameToImage(int width) {
 		assertOpen();
-		Mat frame = MatProvider.mat();
-		capture.readBoxed(frame, width);
-		return ImageUtils.matToBufferedImage(frame);
+		try (Mat frame = MatProvider.mat()) {
+			capture.readBoxed(frame, width);
+			return ImageUtils.matToBufferedImage(frame);
+		}
 	}
 
 	@Override

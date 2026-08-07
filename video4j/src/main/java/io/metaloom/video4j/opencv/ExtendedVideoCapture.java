@@ -127,10 +127,12 @@ public class ExtendedVideoCapture {
 	 */
 	public boolean read(Mat frame, int resX, int resY) {
 		int spaceY = (resX - resY) / 2;
-		Mat target = MatProvider.mat();
-		boolean flag = read(target);
-		Imgproc.resize(target, target, new Size(resX, resY), 0, 0, Imgproc.INTER_LANCZOS4);
-		Core.copyMakeBorder(target, frame, spaceY, spaceY, 0, 0, Core.BORDER_CONSTANT);
-		return flag;
+		// Scratch buffer for the resize, freed here because Mat has no cleaner.
+		try (Mat target = MatProvider.mat()) {
+			boolean flag = read(target);
+			Imgproc.resize(target, target, new Size(resX, resY), 0, 0, Imgproc.INTER_LANCZOS4);
+			Core.copyMakeBorder(target, frame, spaceY, spaceY, 0, 0, Core.BORDER_CONSTANT);
+			return flag;
+		}
 	}
 }

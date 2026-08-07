@@ -606,19 +606,23 @@ public final class CVUtils {
 	 * @return
 	 */
 	public static double blurriness(Mat mat) {
+		// The three scratch buffers are CV_64F, i.e. eight bytes per channel and per pixel - together
+		// roughly 24x the size of the source. Mat has no cleaner, so leaving them to the GC leaks the
+		// lot: a caller measuring one crop per detected face used to grow the process by tens of
+		// megabytes per face and never give any of it back.
 		Mat laplacian = MatProvider.mat();
-		Imgproc.Laplacian(mat, laplacian, CvType.CV_64F);
-
 		Mat laplacianSquared = MatProvider.mat();
-		Core.multiply(laplacian, laplacian, laplacianSquared);
-
 		Mat gnorm = MatProvider.mat();
-		Core.sqrt(laplacianSquared, gnorm);
+		try {
+			Imgproc.Laplacian(mat, laplacian, CvType.CV_64F);
+			Core.multiply(laplacian, laplacian, laplacianSquared);
+			Core.sqrt(laplacianSquared, gnorm);
 
-		Scalar meanSharpness = Core.mean(gnorm); // np.average(gnorm)
-		double sharpness = meanSharpness.val[0];
-
-		return sharpness;
+			Scalar meanSharpness = Core.mean(gnorm); // np.average(gnorm)
+			return meanSharpness.val[0];
+		} finally {
+			free(laplacian, laplacianSquared, gnorm);
+		}
 	}
 
 	public static void drawRect(Mat imageMat, int x, int y, int w, int h) {

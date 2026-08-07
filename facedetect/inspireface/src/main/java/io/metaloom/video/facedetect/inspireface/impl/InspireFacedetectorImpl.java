@@ -147,14 +147,25 @@ public class InspireFacedetectorImpl extends AbstractFacedetector implements Ins
 
 	@Override
 	public List<? extends Face> detectFaces(BufferedImage img) {
+		return detectFaces(img, false);
+	}
+
+	@Override
+	public List<? extends Face> detectFaces(BufferedImage img, boolean withEmbeddings) {
 		int absoluteFaceHeightThreshold = calculateHeightThreshold(img);
 
 		// Detect faces
 		List<Face> faces = new ArrayList<>();
 		FaceDetections detections = InspirefaceLib.detect(session, img);
+		int faceNr = 0;
 		for (Detection detection : detections) {
 			int height = detection.box().getHeight();
 			float conf = detection.conf();
+
+			// The ordinal must track the DETECTION list, not the surviving faces: session.embedding() indexes
+			// into the detections the library returned, so advancing it only for kept faces would shift every
+			// vector after the first discarded one onto the wrong face.
+			int detectionNr = faceNr++;
 
 			// Check if the found face is too small and does not meet the face height threshold.
 			if (height <= absoluteFaceHeightThreshold) {
@@ -164,6 +175,9 @@ public class InspireFacedetectorImpl extends AbstractFacedetector implements Ins
 				continue;
 			}
 			Face face = Face.create(toFaceBox(detection.box()));
+			if (withEmbeddings) {
+				face.setEmbedding(session.embedding(img, detections, detectionNr));
+			}
 			faces.add(face);
 		}
 
