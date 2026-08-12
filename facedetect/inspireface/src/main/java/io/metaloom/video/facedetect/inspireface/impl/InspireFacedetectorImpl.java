@@ -120,7 +120,9 @@ public class InspireFacedetectorImpl extends AbstractFacedetector implements Ins
 			}
 
 			// A value of 180 or above accepts everything, since no axis can rotate further than that.
-			if (maximumFaceAngle < 180f && detection.angles().exceeds(maximumFaceAngle)) {
+			// The null guard matches the one applied when the angles are read a few lines below: a pack built
+			// without the pose slot returns none, and this gate would then throw rather than accept the face.
+			if (maximumFaceAngle < 180f && detection.angles() != null && detection.angles().exceeds(maximumFaceAngle)) {
 				continue;
 			}
 
@@ -168,13 +170,37 @@ public class InspireFacedetectorImpl extends AbstractFacedetector implements Ins
 			int detectionNr = faceNr++;
 
 			// Check if the found face is too small and does not meet the face height threshold.
-			if (height <= absoluteFaceHeightThreshold) {
+			if (height < absoluteFaceHeightThreshold) {
 				continue;
 			}
 			if (conf < miniumConf) {
 				continue;
 			}
+
+			// A value of 180 or above accepts everything, since no axis can rotate further than that.
+			//
+			// This gate used to exist only on the VideoFrame path, so the same picture yielded faces as an image
+			// and none as a video. A face in profile keeps a high detection score while its embedding points
+			// somewhere unrelated, so score alone cannot filter them and the asymmetry silently produced
+			// unmatchable vectors on the image path.
+			if (maximumFaceAngle < 180f && detection.angles() != null && detection.angles().exceeds(maximumFaceAngle)) {
+				continue;
+			}
+
 			Face face = Face.create(toFaceBox(detection.box()));
+			// The detector's own score and pose, which this path used to drop on the floor. Every consumer then had
+			// to invent a confidence, and the one in metaloom wrote a literal 1.0 to the database for every face.
+			face.set(ATTR_CONFIDENCE, conf);
+			if (detection.angles() != null) {
+				face.set(ATTR_ANGEL_PITCH, detection.angles().pitch());
+				face.set(ATTR_ANGEL_YAW, detection.angles().yaw());
+				face.set(ATTR_ANGEL_ROLL, detection.angles().roll());
+			}
+			if (detection.attributes() != null) {
+				face.set(ATTR_AGE_KEY, detection.attributes().age());
+				face.set(ATTR_GENDER_KEY, detection.attributes().gender());
+				face.set(ATTR_RACE_KEY, detection.attributes().race());
+			}
 			if (withEmbeddings) {
 				face.setEmbedding(session.embedding(img, detections, detectionNr));
 			}

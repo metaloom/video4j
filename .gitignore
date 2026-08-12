@@ -4,3 +4,5 @@
 target
 /out
 .vscode
+/facedetect/inspireface/core*
+hs_err_pid*
