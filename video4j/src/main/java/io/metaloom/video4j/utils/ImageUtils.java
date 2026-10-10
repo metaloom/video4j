@@ -65,13 +65,18 @@ public final class ImageUtils {
 	}
 
 	public static void saveJPG(OutputStream os, BufferedImage image) throws IOException {
-		ImageOutputStream out = ImageIO.createImageOutputStream(os);
 		ImageWriteParam params = getImageWriteparams();
 
 		Iterator<ImageWriter> jpgWriters = ImageIO.getImageWritersByFormatName("jpg");
 		ImageWriter writer = jpgWriters.next();
-		writer.setOutput(out);
-		writer.write(null, new IIOImage(image, null, null), params);
+		// The ImageOutputStream is a file-backed cache by default: closing it flushes the encoded bytes to os and deletes
+		// the cache file - neither happened before, so the temp file lingered until GC. Closing it does not close os.
+		try (ImageOutputStream out = ImageIO.createImageOutputStream(os)) {
+			writer.setOutput(out);
+			writer.write(null, new IIOImage(image, null, null), params);
+		} finally {
+			writer.dispose();
+		}
 	}
 
 	public static BufferedImage load(File imageFile) throws IOException {

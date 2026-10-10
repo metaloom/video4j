@@ -48,8 +48,10 @@ public final class FacedetectorUtils {
 		}
 		int x = face.start().x - half;
 		int y = face.start().y - half;
-		int dimX = dim.width + half;
-		int dimY = dim.height + half;
+		// The full padding is added to the size: half of it was moved in front of the face by shifting the
+		// origin, the other half has to extend past it. Adding only half left the right and bottom edges unpadded.
+		int dimX = dim.width + padding;
+		int dimY = dim.height + padding;
 
 		// Clamp crop origin
 		if (x < 0) {

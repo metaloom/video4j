@@ -87,10 +87,13 @@ return faceFrame;
 @Override
 public List<? extends Face> detectFaces(BufferedImage img) {
 Mat mat = MatProvider.mat();
+try {
 CVUtils.bufferedImageToMat(img, mat);
-List<? extends Face> faces = detectFaces(mat);
+return detectFaces(mat);
+} finally {
+// Mat has no cleaner: a detector that throws must not leak the converted image.
 MatProvider.released(mat);
-return faces;
+}
 }
 
 @Override

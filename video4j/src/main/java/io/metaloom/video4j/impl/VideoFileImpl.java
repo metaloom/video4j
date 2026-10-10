@@ -5,7 +5,6 @@ import java.util.Iterator;
 import io.metaloom.opencv.core.Mat;
 
 import io.metaloom.video4j.AbstractVideo;
-import io.metaloom.video4j.Video;
 import io.metaloom.video4j.VideoFile;
 import io.metaloom.video4j.VideoFrame;
 import io.metaloom.video4j.opencv.ExtendedVideoCapture;
@@ -93,7 +92,6 @@ public class VideoFileImpl extends AbstractVideo implements VideoFile {
 	@Override
 	public Iterator<VideoFrame> videoFrameIterator() {
 		long total = length();
-		Video vid = this;
 		Iterator<VideoFrame> it = new Iterator<VideoFrame>() {
 
 			@Override
@@ -103,7 +101,9 @@ public class VideoFileImpl extends AbstractVideo implements VideoFile {
 
 			@Override
 			public VideoFrame next() {
-				return new VideoFrameImpl(vid, currentFrame(), frameToMat());
+				// frame() numbers the frame from the position before the read and yields null at end of
+				// stream, instead of a VideoFrame that wraps a null Mat and throws on first use.
+				return frame();
 			}
 
 			@Override

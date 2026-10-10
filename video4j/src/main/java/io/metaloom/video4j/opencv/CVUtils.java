@@ -7,7 +7,6 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferInt;
 import java.util.Collection;
 import java.util.Random;
 
@@ -30,12 +29,32 @@ public final class CVUtils {
 	private static final double BLACK_FRAME_THRESHOLD = 10.0f;
 
 	public static BufferedImage matToBufferedImage(Mat original) {
-		BufferedImage image = null;
 		int width = original.width(), height = original.height(), channels = original.channels();
+		if (width <= 0 || height <= 0) {
+			throw new IllegalArgumentException("Can't convert an empty Mat (" + width + "x" + height + ") into an image.");
+		}
+		if (original.depth() != CvType.CV_8U) {
+			throw new IllegalArgumentException("Only 8-bit Mats can be converted into an image, got depth " + original.depth());
+		}
+		if (channels == 4) {
+			// BGRA: the raster copy below assumes three bytes per pixel, so a four channel Mat used to overflow the
+			// target array. Drop the alpha channel first; the scratch Mat is freed again right here.
+			Mat bgr = MatProvider.mat();
+			try {
+				Imgproc.cvtColor(original, bgr, Imgproc.COLOR_BGRA2BGR);
+				return matToBufferedImage(bgr);
+			} finally {
+				free(bgr);
+			}
+		}
+		if (channels != 1 && channels != 3) {
+			throw new IllegalArgumentException("Can't convert a Mat with " + channels + " channels into an image.");
+		}
 		byte[] sourcePixels = new byte[width * height * channels];
 		original.get(0, 0, sourcePixels);
 
-		if (original.channels() > 1) {
+		BufferedImage image;
+		if (channels == 3) {
 			image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
 		} else {
 			image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
@@ -46,33 +65,71 @@ public final class CVUtils {
 		return image;
 	}
 
+	/**
+	 * Copy the image into the mat as packed 8-bit BGR ({@code CV_8UC3}). The mat is (re)allocated to the image size when needed.
+	 * 
+	 * <p>
+	 * Every {@link BufferedImage} layout is handled: a {@code TYPE_3BYTE_BGR} raster is copied directly, everything else (greyscale, images with an
+	 * alpha channel, {@code int}-packed RGB/ARGB/BGR, indexed and binary images, sub-images with a scanline stride) goes through
+	 * {@link BufferedImage#getRGB(int, int, int, int, int[], int, int)}. The alpha channel is dropped.
+	 * </p>
+	 * 
+	 * @param image
+	 * @param dest
+	 */
 	public static void bufferedImageToMat(BufferedImage image, Mat dest) {
-
-		DataBuffer dataBuffer = image.getRaster().getDataBuffer();
-		byte[] imgPixels = null;
-
 		int width = image.getWidth();
 		int height = image.getHeight();
-
-		if (dataBuffer instanceof DataBufferByte) {
-			imgPixels = ((DataBufferByte) dataBuffer).getData();
+		if (dest.empty() || dest.rows() != height || dest.cols() != width || dest.type() != CvType.CV_8UC3) {
+			// Mat.create is a no-op when the shape already matches, so this is only ever an allocation for the
+			// empty MatProvider.mat() that callers typically hand in - into which put() used to fail silently.
+			dest.create(height, width, CvType.CV_8UC3);
 		}
 
-		if (dataBuffer instanceof DataBufferInt) {
-
-			int byteSize = width * height;
-			imgPixels = new byte[byteSize * 3];
-
-			int[] imgIntegerPixels = ((DataBufferInt) dataBuffer).getData();
-
-			for (int p = 0; p < byteSize; p++) {
-				imgPixels[p * 3 + 0] = (byte) ((imgIntegerPixels[p] & 0x00FF0000) >> 16);
-				imgPixels[p * 3 + 1] = (byte) ((imgIntegerPixels[p] & 0x0000FF00) >> 8);
-				imgPixels[p * 3 + 2] = (byte) (imgIntegerPixels[p] & 0x000000FF);
+		byte[] imgPixels;
+		if (isPackedBGR(image)) {
+			imgPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+		} else if (image.getType() == BufferedImage.TYPE_BYTE_GRAY || image.getType() == BufferedImage.TYPE_USHORT_GRAY) {
+			// Replicate the raw grey sample into all three channels. getRGB() would apply the linear-grey to sRGB
+			// transfer of the colour model and brighten every pixel (20 becomes 79).
+			int shift = image.getType() == BufferedImage.TYPE_USHORT_GRAY ? 8 : 0;
+			int[] samples = image.getRaster().getSamples(0, 0, width, height, 0, (int[]) null);
+			imgPixels = new byte[width * height * 3];
+			for (int p = 0; p < samples.length; p++) {
+				byte v = (byte) (samples[p] >> shift);
+				imgPixels[p * 3 + 0] = v;
+				imgPixels[p * 3 + 1] = v;
+				imgPixels[p * 3 + 2] = v;
+			}
+		} else {
+			int[] argb = image.getRGB(0, 0, width, height, null, 0, width);
+			imgPixels = new byte[width * height * 3];
+			for (int p = 0; p < argb.length; p++) {
+				int rgb = argb[p];
+				imgPixels[p * 3 + 0] = (byte) (rgb & 0xFF);
+				imgPixels[p * 3 + 1] = (byte) ((rgb >> 8) & 0xFF);
+				imgPixels[p * 3 + 2] = (byte) ((rgb >> 16) & 0xFF);
 			}
 		}
-
 		dest.put(0, 0, imgPixels);
+	}
+
+	/**
+	 * Check whether the raster of the image is exactly the packed BGR layout of a {@code CV_8UC3} Mat, i.e. whether its data buffer can be copied
+	 * verbatim. A sub-image shares the (larger, offset) buffer of its parent and therefore does not qualify.
+	 */
+	private static boolean isPackedBGR(BufferedImage image) {
+		if (image.getType() != BufferedImage.TYPE_3BYTE_BGR) {
+			return false;
+		}
+		DataBuffer dataBuffer = image.getRaster().getDataBuffer();
+		if (!(dataBuffer instanceof DataBufferByte) || dataBuffer.getNumBanks() != 1 || dataBuffer.getOffset() != 0) {
+			return false;
+		}
+		int expected = image.getWidth() * image.getHeight() * 3;
+		return dataBuffer.getSize() == expected
+			&& image.getRaster().getSampleModelTranslateX() == 0
+			&& image.getRaster().getSampleModelTranslateY() == 0;
 	}
 
 	public static BufferedImage toBufferedImageOfType(BufferedImage original, int type) {
@@ -105,8 +162,20 @@ public final class CVUtils {
 	}
 
 	public static VideoFrame blur(VideoFrame frame) {
-		frame.setMat(blur(frame.mat()));
+		replaceMat(frame, blur(frame.mat()));
 		return frame;
+	}
+
+	/**
+	 * Swap the mat of the frame for a freshly computed one and free the one it replaces. Mat has no cleaner: every filter
+	 * that used to call {@code frame.setMat(result)} directly dropped the previous frame data on the floor, once per frame.
+	 */
+	private static void replaceMat(VideoFrame frame, Mat replacement) {
+		Mat previous = frame.mat();
+		frame.setMat(replacement);
+		if (previous != null && previous != replacement) {
+			free(previous);
+		}
 	}
 
 	public static Mat blur(Mat origin) {
@@ -124,29 +193,37 @@ public final class CVUtils {
 	}
 
 	public static VideoFrame harris(VideoFrame frame) {
-		frame.setMat(harris(frame.mat()));
+		replaceMat(frame, harris(frame.mat()));
 		return frame;
 	}
 
 	public static Mat harris(Mat origin) {
 		Mat grayMat = MatProvider.mat();
-		Imgproc.cvtColor(origin, grayMat, Imgproc.COLOR_RGB2GRAY);
 		Mat corners = MatProvider.mat();
 		Mat tempDst = MatProvider.mat();
 		Mat tempDstNorm = MatProvider.mat();
-		Imgproc.cornerHarris(grayMat, tempDst, 2, 3, 0.04);
-		Core.normalize(tempDst, tempDstNorm, 0, 255, Core.NORM_MINMAX);
-		Core.convertScaleAbs(tempDstNorm, corners);
-		Random random = new Random();
-		for (int i = 0; i < tempDstNorm.cols(); i++) {
-			for (int j = 0; j < tempDstNorm.rows(); j++) {
-				double[] value = tempDstNorm.get(j, i);
-				if (value[0] > 250) {
-					Imgproc.circle(corners, new Point(i, j), 5, new Scalar(random.nextInt(255)), 2);
+		try {
+			toGrayScale(origin, grayMat);
+			Imgproc.cornerHarris(grayMat, tempDst, 2, 3, 0.04);
+			Core.normalize(tempDst, tempDstNorm, 0, 255, Core.NORM_MINMAX);
+			Core.convertScaleAbs(tempDstNorm, corners);
+			Random random = new Random();
+			for (int i = 0; i < tempDstNorm.cols(); i++) {
+				for (int j = 0; j < tempDstNorm.rows(); j++) {
+					double[] value = tempDstNorm.get(j, i);
+					if (value[0] > 250) {
+						Imgproc.circle(corners, new Point(i, j), 5, new Scalar(random.nextInt(255)), 2);
+					}
 				}
 			}
+			return corners;
+		} catch (RuntimeException e) {
+			free(corners);
+			throw e;
+		} finally {
+			// Only the result leaves this method; the three scratch Mats (one of them CV_32F) used to leak per call.
+			free(grayMat, tempDst, tempDstNorm);
 		}
-		return corners;
 	}
 
 	public static void resize(Mat step1, Mat step2, int x, int y) {
@@ -205,8 +282,14 @@ public final class CVUtils {
 			free(frame);
 		}
 
-		int spaceY = (resX - resY) / 2;
-		Core.copyMakeBorder(target, target, spaceY, spaceY, 0, 0, Core.BORDER_CONSTANT);
+		int space = (resX - resY) / 2;
+		int rest = resX - resY - space;
+		if (vvs) {
+			// A portrait frame is resX high and resY wide: the padding has to go left and right to end up with a 1:1 image.
+			Core.copyMakeBorder(target, target, 0, 0, space, rest, Core.BORDER_CONSTANT);
+		} else {
+			Core.copyMakeBorder(target, target, space, rest, 0, 0, Core.BORDER_CONSTANT);
+		}
 		vframe.setMat(target);
 
 		return false;
@@ -267,7 +350,7 @@ public final class CVUtils {
 	 * @return
 	 */
 	public static VideoFrame canny(VideoFrame frame, double threshold1, double threshold2) {
-		frame.setMat(canny(frame.mat(), threshold1, threshold2));
+		replaceMat(frame, canny(frame.mat(), threshold1, threshold2));
 		return frame;
 	}
 
@@ -283,24 +366,43 @@ public final class CVUtils {
 	 */
 	public static Mat canny(Mat frame, double threshold1, double threshold2) {
 		Mat grayFrame = MatProvider.mat();
-		// Convert to grayscale
-		Imgproc.cvtColor(frame, grayFrame, Imgproc.COLOR_RGB2GRAY);
 		Mat edges = MatProvider.mat();
-		Imgproc.Canny(grayFrame, edges, threshold1, threshold2);
-		return edges;
+		try {
+			// Convert to grayscale (a no-op copy for input that is already single channel - the unconditional
+			// RGB2GRAY used to throw on the output of toGrayScale, the very thing it is chained behind in the README).
+			toGrayScale(frame, grayFrame);
+			Imgproc.Canny(grayFrame, edges, threshold1, threshold2);
+			return edges;
+		} catch (RuntimeException e) {
+			free(edges);
+			throw e;
+		} finally {
+			free(grayFrame);
+		}
 	}
 
 	public static VideoFrame houghLines(VideoFrame frame, double rho, double theta, int threshold, double srn, double stn) {
-		frame.setMat(houghLines(frame.mat(), rho, theta, threshold, srn, stn));
+		replaceMat(frame, houghLines(frame.mat(), rho, theta, threshold, srn, stn));
 		return frame;
 	}
 
 	public static Mat houghLines(Mat frame, double rho, double theta, int threshold, double srn, double stn) {
-		Mat cannyColor = frame.clone();
-		Imgproc.cvtColor(frame, cannyColor, Imgproc.COLOR_GRAY2BGR);
+		Mat cannyColor = MatProvider.mat();
 		Mat lines = MatProvider.mat();
-		Imgproc.HoughLines(frame, lines, rho, theta, threshold, srn, stn);
+		try {
+			Imgproc.cvtColor(frame, cannyColor, Imgproc.COLOR_GRAY2BGR);
+			Imgproc.HoughLines(frame, lines, rho, theta, threshold, srn, stn);
+			drawHoughLines(cannyColor, lines);
+			return cannyColor;
+		} catch (RuntimeException e) {
+			free(cannyColor);
+			throw e;
+		} finally {
+			free(lines);
+		}
+	}
 
+	private static void drawHoughLines(Mat cannyColor, Mat lines) {
 		for (int i = 0; i < lines.rows(); i++) {
 			double data[] = lines.get(i, 0);
 			double rho1 = data[0];
@@ -313,12 +415,10 @@ public final class CVUtils {
 			Point pt2 = new Point(x0 - 10000 * (-sinTheta), y0 - 10000 * cosTheta);
 			Imgproc.line(cannyColor, pt1, pt2, new Scalar(0, 0, 255), 2);
 		}
-		return cannyColor;
-
 	}
 
 	public static VideoFrame houghLinesP(VideoFrame frame, double rho, double theta, int threshold, double minLineLength, double maxLineGap) {
-		frame.setMat(houghLinesP(frame.mat(), rho, theta, threshold, minLineLength, maxLineGap));
+		replaceMat(frame, houghLinesP(frame.mat(), rho, theta, threshold, minLineLength, maxLineGap));
 		return frame;
 	}
 
@@ -339,19 +439,25 @@ public final class CVUtils {
 	 * @return
 	 */
 	public static Mat houghLinesP(Mat frame, double rho, double theta, int threshold, double minLineLength, double maxLineGap) {
-		Mat cannyColor = frame.clone();
-		Imgproc.cvtColor(frame, cannyColor, Imgproc.COLOR_GRAY2BGR);
-
+		Mat cannyColor = MatProvider.mat();
 		Mat lines = MatProvider.mat();
-		Imgproc.HoughLinesP(frame, lines, rho, theta, threshold, minLineLength, maxLineGap);
-
-		for (int i = 0; i < lines.rows(); i++) {
-			double[] val = lines.get(i, 0);
-			Point pt1 = new Point(val[0], val[1]);
-			Point pt2 = new Point(val[2], val[3]);
-			Imgproc.line(cannyColor, pt1, pt2, new Scalar(0, 0, 255), 2);
+		try {
+			Imgproc.cvtColor(frame, cannyColor, Imgproc.COLOR_GRAY2BGR);
+			Imgproc.HoughLinesP(frame, lines, rho, theta, threshold, minLineLength, maxLineGap);
+			for (int i = 0; i < lines.rows(); i++) {
+				double[] val = lines.get(i, 0);
+				Point pt1 = new Point(val[0], val[1]);
+				Point pt2 = new Point(val[2], val[3]);
+				Imgproc.line(cannyColor, pt1, pt2, new Scalar(0, 0, 255), 2);
+			}
+			return cannyColor;
+		} catch (RuntimeException e) {
+			free(cannyColor);
+			throw e;
+		} finally {
+			// The accumulator of detected lines is never handed out and used to leak on every call.
+			free(lines);
 		}
-		return cannyColor;
 	}
 
 	public static VideoFrame crop(VideoFrame frame, java.awt.Point start, Dimension dim, int padding) {
@@ -387,22 +493,12 @@ public final class CVUtils {
 		if (padding > 0) {
 			halfPedding = padding / 2;
 		}
-		int startX = start.x - halfPedding;
-		if (startX <= 0) {
-			startX = 1;
-		}
-		int startY = start.y - halfPedding;
-		if (startY <= 0) {
-			startY = 1;
-		}
-		int width = dim.width + padding;
-		if (startX + width > mat.width()) {
-			width = mat.width() - startX;
-		}
-		int height = dim.height + padding;
-		if (startY + height > mat.height()) {
-			height = mat.height() - startY;
-		}
+		// Clamp to the image. The origin used to be pushed to pixel 1 (not 0), so every crop touching the left or
+		// top edge was shifted by a pixel and lost a column or row.
+		int startX = Math.max(0, Math.min(start.x - halfPedding, mat.width()));
+		int startY = Math.max(0, Math.min(start.y - halfPedding, mat.height()));
+		int width = Math.max(0, Math.min(dim.width + padding, mat.width() - startX));
+		int height = Math.max(0, Math.min(dim.height + padding, mat.height() - startY));
 		Rect roi = new Rect(startX, startY, width, height);
 		return mat.submat(roi);
 	}
@@ -451,10 +547,26 @@ public final class CVUtils {
 	}
 
 	public static void toGrayScale(Mat src, Mat dst) {
+		int channels = src.channels();
+		if (channels == 1) {
+			// Already grey. cvtColor rejects a single channel source, which made every grey->grey chain
+			// (toGrayScale followed by canny, or toGrayScale applied twice) blow up.
+			if (src != dst) {
+				src.copyTo(dst);
+			}
+			return;
+		}
+		if (channels == 4) {
+			Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGRA2GRAY);
+			return;
+		}
+		// Kept as RGB2GRAY on purpose although decoded frames are BGR: the fingerprinters are built on this
+		// conversion and every stored fingerprint would change with the channel weights.
 		Imgproc.cvtColor(src, dst, Imgproc.COLOR_RGB2GRAY);
 	}
 
 	public static VideoFrame toGrayScale(VideoFrame frame) {
+		// In-place conversion: the frame keeps its Mat, nothing to free.
 		frame.setMat(toGrayScale(frame.mat()));
 		return frame;
 	}
@@ -501,23 +613,31 @@ public final class CVUtils {
 		boolean vvs = ratio < 1;
 		int resY = vvs ? (int) (((double) resX) * ratio) : (int) (((double) resX) / ratio);
 
-		int spaceY = (resX - resY) / 2;
+		int space = (resX - resY) / 2;
+		int rest = resX - resY - space;
 		int method = Imgproc.INTER_LANCZOS4;
-		Mat target = null;
-		if (vvs) {
-			target = new Mat(resY, resX, frame.type());
-			Imgproc.resize(frame, target, new Size(resY, resX), 0, 0, method);
-		} else {
-			target = new Mat(resX, resY, frame.type());
-			Imgproc.resize(frame, target, new Size(resX, resY), 0, 0, method);
+		Mat target = MatProvider.mat();
+		try {
+			if (vvs) {
+				// Portrait: resX becomes the height, the (smaller) resY the width, and the padding goes left and right.
+				// Padding top and bottom, as before, produced a resY x (2 resX - resY) image instead of the documented 1:1 box.
+				Imgproc.resize(frame, target, new Size(resY, resX), 0, 0, method);
+				Core.copyMakeBorder(target, frame, 0, 0, space, rest, Core.BORDER_CONSTANT);
+			} else {
+				Imgproc.resize(frame, target, new Size(resX, resY), 0, 0, method);
+				Core.copyMakeBorder(target, frame, space, rest, 0, 0, Core.BORDER_CONSTANT);
+			}
+		} finally {
+			free(target);
 		}
-		Core.copyMakeBorder(target, frame, spaceY, spaceY, 0, 0, Core.BORDER_CONSTANT);
-		free(target);
 
 		return false;
 	}
 
 	public static void free(Collection<Mat> mats) {
+		if (mats == null) {
+			return;
+		}
 		for (Mat mat : mats) {
 			MatProvider.released(mat);
 		}
@@ -539,11 +659,11 @@ public final class CVUtils {
 	 * @param value
 	 */
 	public static void clear(Mat mat, double value) {
-		for (int x = 0; x < mat.width(); x++) {
-			for (int y = 0; y < mat.height(); y++) {
-				mat.put(x, y, new double[] { value });
-			}
-		}
+		// setTo converts the value to the depth of the mat. The former per-pixel put(row, col, double[]) copied the
+		// raw 8-byte double into the buffer whatever the depth: on the 8-bit mats this is used for it filled the
+		// wrong bytes and wrote seven bytes past the end of the buffer on the last pixel. It also had row and
+		// column swapped, so non-square mats were only partially cleared.
+		mat.setTo(Scalar.all(value));
 	}
 
 	/**

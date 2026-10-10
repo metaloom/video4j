@@ -127,6 +127,8 @@ public class MultiSectorVideoFingerprinterImpl extends AbstractVideoFingerprinte
 
 					// 3. Skip black frames
 					if (isBlackFrame(step1)) {
+						// The scratch buffer is not reused; without this every skipped black frame leaked a 512x512 Mat.
+						CVUtils.free(step1);
 						continue;
 					}
 
@@ -140,7 +142,6 @@ public class MultiSectorVideoFingerprinterImpl extends AbstractVideoFingerprinte
 					// 5. Normalize
 					Mat step2 = empty(frame);
 					normalize(step1, step2, 0, 255);
-					CVUtils.free(step1);
 
 					// 6. Stack the image
 					Mat oldStack = stack;
@@ -156,11 +157,16 @@ public class MultiSectorVideoFingerprinterImpl extends AbstractVideoFingerprinte
 					Mat step4 = empty(step3);
 					normalize(step3, step4, 0, 255);
 
+					// Only the result of the last iteration is handed out; the intermediate binarisations used to be
+					// overwritten without ever being freed.
+					CVUtils.free(finalStep);
 					finalStep = toBinary(step4, handler);
 
 					if (handler != null) {
 						handler.update(frame, step1, step2, step3, step4, finalStep, null, null);
 					}
+					// step1 is freed after the preview handler has seen it, not before.
+					CVUtils.free(step1);
 					CVUtils.free(oldStack);
 					CVUtils.free(step2);
 					CVUtils.free(step3);

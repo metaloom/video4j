@@ -20,7 +20,8 @@ public class SafeMat implements AutoCloseable {
 
 	@Override
 	public void close() {
-		mat.release();
+		// close() rather than release(): release() leaves the native cv::Mat header behind for good.
+		MatProvider.released(mat);
 	}
 
 	public Mat delegate() {

@@ -103,6 +103,8 @@ public abstract class AbstractVideoFingerprinter<T extends Fingerprint> implemen
 
 				// 3. Skip black frames
 				if (isBlackFrame(step1)) {
+					// The scratch buffer is not reused; without this every skipped black frame leaked a 512x512 Mat.
+					CVUtils.free(step1);
 					continue;
 				}
 
@@ -116,7 +118,6 @@ public abstract class AbstractVideoFingerprinter<T extends Fingerprint> implemen
 				// 5. Normalize
 				Mat step2 = empty(frame);
 				normalize(step1, step2, 0, 255);
-				CVUtils.free(step1);
 
 				// 6. Stack the image
 				double factor = (1.0d / (double) len * stackFactor);
@@ -133,11 +134,16 @@ public abstract class AbstractVideoFingerprinter<T extends Fingerprint> implemen
 				Mat step4 = empty(step3);
 				normalize(step3, step4, 0, 255);
 
+				// Only the result of the last iteration is handed out; the intermediate binarisations used to be
+				// overwritten without ever being freed.
+				CVUtils.free(finalStep);
 				finalStep = toBinary(step4, handler);
 
 				if (handler != null) {
 					handler.update(frame, step1, step2, step3, step4, finalStep, null, null);
 				}
+				// step1 is freed after the preview handler has seen it, not before.
+				CVUtils.free(step1);
 				CVUtils.free(oldStack);
 				CVUtils.free(step2);
 				CVUtils.free(step3);
@@ -169,15 +175,13 @@ public abstract class AbstractVideoFingerprinter<T extends Fingerprint> implemen
 	}
 
 	public void thresh(Mat frame) {
-		for (int x = 0; x < frame.width(); x++) {
-			for (int y = 0; y < frame.height(); y++) {
-				double[] value = frame.get(x, y);
+		// Inverted binarisation of an 8-bit mat. Mat.put copies the raw bytes of the array it is given, so the value
+		// has to be written as a byte: writing a double[] into a CV_8U mat scribbled eight bytes per pixel.
+		for (int row = 0; row < frame.rows(); row++) {
+			for (int col = 0; col < frame.cols(); col++) {
+				double[] value = frame.get(row, col);
 				boolean bit = value[0] > 128.0f ? true : false;
-				if (bit) {
-					frame.put(x, y, new double[]{0});
-				} else {
-					frame.put(x, y, new double[]{255});
-				}
+				frame.put(row, col, new byte[] { bit ? (byte) 0 : (byte) 255 });
 			}
 		}
 	}

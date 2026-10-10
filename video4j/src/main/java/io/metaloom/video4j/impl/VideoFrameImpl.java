@@ -46,8 +46,10 @@ public class VideoFrameImpl implements VideoFrame {
 
 	@Override
 	public void close() throws Exception {
+		// Frees header and pixels and drops the leak-tracking entry. release() alone kept the native
+		// cv::Mat header alive for the lifetime of the process, once per frame ever read.
 		if (frame != null) {
-			frame.release();
+			MatProvider.released(frame);
 		}
 	}
 

@@ -1,5 +1,8 @@
 package io.metaloom.video4j.utils;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
@@ -36,7 +39,42 @@ public class ImageUtilsTest {
 	public void testImage2Base64JPG() throws IOException {
 		BufferedImage img = createTestImage();
 		String base64Image = ImageUtils.toBase64JPG(img);
-		System.out.println(base64Image);
+		// The encoding must decode back into the very image - padding emitted mid-stream broke this.
+		byte[] jpg = java.util.Base64.getDecoder().decode(base64Image);
+		BufferedImage decoded = javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(jpg));
+		assertNotNull(decoded, "Base64 payload must be a decodable JPEG");
+		assertEquals(200, decoded.getWidth());
+		assertEquals(200, decoded.getHeight());
+	}
+
+	@Test
+	public void testBase64OutputStreamSurvivesFlushMidGroup() throws IOException {
+		byte[] input = "The quick brown fox jumps over the lazy dog".getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+		java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+		try (Base64OutputStream out = new Base64OutputStream(bos)) {
+			for (int i = 0; i < input.length; i++) {
+				out.write(input[i]);
+				// Flush after every byte, i.e. in the middle of every 3-byte group
+				out.flush();
+			}
+		}
+		String encoded = bos.toString(java.nio.charset.StandardCharsets.US_ASCII);
+		assertEquals(java.util.Base64.getEncoder().encodeToString(input), encoded);
+		assertArrayEquals(input, java.util.Base64.getDecoder().decode(encoded));
+	}
+
+	@Test
+	public void testSaveJPGWritesCompleteStream() throws IOException {
+		BufferedImage img = createTestImage();
+		java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+		ImageUtils.saveJPG(bos, img);
+		// The stream passed in must stay open for the caller
+		bos.write(0);
+		byte[] data = bos.toByteArray();
+		assertTrue(data.length > 2);
+		// JPEG EOI marker right before our trailing byte: the whole file reached the stream
+		assertEquals((byte) 0xFF, data[data.length - 3]);
+		assertEquals((byte) 0xD9, data[data.length - 2]);
 	}
 
 	private BufferedImage createTestImage() {

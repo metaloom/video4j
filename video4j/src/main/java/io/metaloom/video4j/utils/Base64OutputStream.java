@@ -26,7 +26,9 @@ public class Base64OutputStream extends OutputStream {
 
 	@Override
 	public void flush() throws IOException {
-		flushBuffer();
+		// Only pass the flush through. Encoding a partial 3-byte group here emitted "=" padding in the middle of the
+		// stream whenever a writer flushed between groups (ImageIO's cache stream does), which corrupts the Base64.
+		// The final partial group is written by close().
 		outputStream.flush();
 	}
 

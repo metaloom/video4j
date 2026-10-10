@@ -61,9 +61,16 @@ public abstract class AbstractVideo implements Video {
 		assertOpen();
 		// The decoded Mat exists only to be copied into the BufferedImage. Mat has no cleaner, so it has to be freed here - a caller sampling frames in
 		// a loop would otherwise retain every frame it ever read.
-		try (Mat frame = MatProvider.mat()) {
-			capture.read(frame);
+		Mat frame = MatProvider.mat();
+		try {
+			if (!capture.read(frame)) {
+				// End of stream. Converting the empty Mat used to throw an IllegalArgumentException
+				// from BufferedImage(0, 0) instead of signalling "no further frame" like the sibling methods.
+				return null;
+			}
 			return ImageUtils.matToBufferedImage(frame);
+		} finally {
+			MatProvider.released(frame);
 		}
 	}
 
@@ -74,6 +81,8 @@ public abstract class AbstractVideo implements Video {
 		if (capture.read(frame)) {
 			return frame;
 		} else {
+			// Nobody else ever sees this Mat, and it has no cleaner.
+			MatProvider.released(frame);
 			return null;
 		}
 	}
@@ -86,9 +95,13 @@ public abstract class AbstractVideo implements Video {
 
 	@Override
 	public VideoFrame frame() {
+		// The number must be read BEFORE the decode: CAP_PROP_POS_FRAMES is the index of the frame that
+		// will be read next, so reading it afterwards numbered every frame one too high and disagreed
+		// with videoFrameIterator(), which numbers the same frame from the position before the read.
+		long number = currentFrame();
 		Mat mat = frameToMat();
 		if (mat != null) {
-			return new VideoFrameImpl(this, currentFrame(), mat);
+			return new VideoFrameImpl(this, number, mat);
 		} else {
 			return null;
 		}
@@ -97,20 +110,28 @@ public abstract class AbstractVideo implements Video {
 	@Override
 	public BufferedImage frameToImage(int width, int height) {
 		assertOpen();
-		try (Mat frame = MatProvider.mat()) {
+		Mat frame = MatProvider.mat();
+		try {
 			if (!capture.read(frame, width, height)) {
 				return null;
 			}
 			return ImageUtils.matToBufferedImage(frame);
+		} finally {
+			MatProvider.released(frame);
 		}
 	}
 
 	@Override
 	public BufferedImage boxedFrameToImage(int width) {
 		assertOpen();
-		try (Mat frame = MatProvider.mat()) {
-			capture.readBoxed(frame, width);
+		Mat frame = MatProvider.mat();
+		try {
+			if (!capture.readBoxed(frame, width)) {
+				return null;
+			}
 			return ImageUtils.matToBufferedImage(frame);
+		} finally {
+			MatProvider.released(frame);
 		}
 	}
 
@@ -124,7 +145,11 @@ public abstract class AbstractVideo implements Video {
 	public Mat boxedFrameToMat(int width) {
 		assertOpen();
 		Mat frame = MatProvider.mat();
-		capture.readBoxed(frame, width);
+		if (!capture.readBoxed(frame, width)) {
+			// Same contract as frameToMat(): null at end of stream, and the scratch Mat is given back.
+			MatProvider.released(frame);
+			return null;
+		}
 		return frame;
 	}
 

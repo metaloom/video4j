@@ -112,9 +112,12 @@ public class ExtendedVideoCapture {
 	public boolean readBoxed(Mat frame, int resX) {
 		int width = width();
 		int height = height();
-		boolean flag = read(frame);
+		if (!read(frame)) {
+			// At end of stream the Mat is empty; resizing it throws a CvException instead of the documented false.
+			return false;
+		}
 		CVUtils.boxFrame(frame, resX, width, height);
-		return flag;
+		return true;
 	}
 
 	/**
@@ -128,11 +131,16 @@ public class ExtendedVideoCapture {
 	public boolean read(Mat frame, int resX, int resY) {
 		int spaceY = (resX - resY) / 2;
 		// Scratch buffer for the resize, freed here because Mat has no cleaner.
-		try (Mat target = MatProvider.mat()) {
-			boolean flag = read(target);
+		Mat target = MatProvider.mat();
+		try {
+			if (!read(target)) {
+				return false;
+			}
 			Imgproc.resize(target, target, new Size(resX, resY), 0, 0, Imgproc.INTER_LANCZOS4);
 			Core.copyMakeBorder(target, frame, spaceY, spaceY, 0, 0, Core.BORDER_CONSTANT);
-			return flag;
+			return true;
+		} finally {
+			MatProvider.released(target);
 		}
 	}
 }

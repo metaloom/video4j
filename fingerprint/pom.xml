@@ -53,10 +53,11 @@
         </dependency>
 
         <!-- Test -->
+        <!-- Version managed by the parent: pinning 5.9.3 here mixed junit-platform-engine 1.9.3 with the managed
+             jupiter-api 6.0.3 and crashed the surefire fork (NoClassDefFoundError: OutputDirectoryCreator). -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.9.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -66,34 +66,36 @@ public class PreviewGenerator {
 		long nFrame = 0;
 		List<Mat> frames = new ArrayList<>();
 		Mat frame = MatProvider.mat();
-		while (true) {
-			if (!video.boxedFrame(frame, tileWidth)) {
-				break;
-			}
-			video.seekToFrame(nFrame);
-			if (text) {
-				Imgproc.putText(frame, "s: " + segment, new Point(0, 25), Imgproc.FONT_HERSHEY_DUPLEX, 0.8d, Scalar.all(255), 1);
-				Imgproc.putText(frame, "f: " + nFrame, new Point(80, 25), Imgproc.FONT_HERSHEY_DUPLEX, 0.8d, Scalar.all(255), 1);
-			}
+		try {
+			while (true) {
+				if (!video.boxedFrame(frame, tileWidth)) {
+					break;
+				}
+				video.seekToFrame(nFrame);
+				if (text) {
+					Imgproc.putText(frame, "s: " + segment, new Point(0, 25), Imgproc.FONT_HERSHEY_DUPLEX, 0.8d, Scalar.all(255), 1);
+					Imgproc.putText(frame, "f: " + nFrame, new Point(80, 25), Imgproc.FONT_HERSHEY_DUPLEX, 0.8d, Scalar.all(255), 1);
+				}
 
-			if (handler != null) {
-				handler.update(generateTilemap(frames, cols, rows));
-			}
-			frames.add(frame.clone());
+				if (handler != null) {
+					handler.update(generateTilemap(frames, cols, rows));
+				}
+				frames.add(frame.clone());
 
-			long newStart = current += skipLen;
-			if (newStart >= totalFrames) {
-				break;
+				long newStart = current += skipLen;
+				if (newStart >= totalFrames) {
+					break;
+				}
+				segment++;
+				video.seekToFrame(newStart);
+				nFrame = newStart;
 			}
-			segment++;
-			video.seekToFrame(newStart);
-			nFrame = newStart;
+			return generateTilemap(frames, cols, rows);
+		} finally {
+			// Release resources - also when a decode or concat throws, Mat has no cleaner.
+			CVUtils.free(frames);
+			CVUtils.free(frame);
 		}
-		BufferedImage image = generateTilemap(frames, cols, rows);
-		// Release resources
-		CVUtils.free(frames);
-		CVUtils.free(frame);
-		return image;
 	}
 
 	private BufferedImage generateTilemap(List<Mat> frames, int cols, int rows) {
@@ -105,35 +107,36 @@ public class PreviewGenerator {
 		Stack<Mat> stack = new Stack<>();
 		stack.addAll(reversed);
 
+		// The tiles stay owned by the caller: this used to free every tile it concatenated, so a preview handler
+		// (which gets a tilemap after every captured frame) left the caller with released tiles for the next call.
 		Mat target = MatProvider.mat();
 		List<Mat> allRows = new ArrayList<>();
-		while (!stack.isEmpty()) {
-			List<Mat> rowList = pullElements(stack, cols + 1);
-			Mat row = MatProvider.mat();
-			Core.hconcat(rowList, row);
-			CVUtils.free(rowList);
-			allRows.add(row);
-		}
-		// for(Mat row : allRows) {
-		// System.out.println(row.width());
-		// Core.copyMakeBorder(row, row, 0, 0, cols*384, 0, Core.BORDER_CONSTANT);
-		// }
-
-		if (rows != 1) {
-			try {
-				Core.vconcat(allRows, target);
-				CVUtils.free(allRows);
-			} catch (Exception e) {
-				// Ignored
+		try {
+			int fullWidth = 0;
+			while (!stack.isEmpty()) {
+				List<Mat> rowList = pullElements(stack, cols + 1);
+				Mat row = MatProvider.mat();
+				allRows.add(row);
+				Core.hconcat(rowList, row);
+				fullWidth = Math.max(fullWidth, row.width());
+			}
+			// A partial last row (and every intermediate tilemap handed to a preview handler) is narrower than the
+			// others; vconcat insists on equal widths, so pad it with black on the right.
+			for (Mat row : allRows) {
+				if (row.width() < fullWidth) {
+					Core.copyMakeBorder(row, row, 0, 0, 0, fullWidth - row.width(), Core.BORDER_CONSTANT);
+				}
 			}
 
-			BufferedImage image = CVUtils.matToBufferedImage(target);
-			CVUtils.free(target);
-			return image;
-		} else {
-			BufferedImage image = CVUtils.matToBufferedImage(allRows.get(0));
+			if (rows != 1) {
+				Core.vconcat(allRows, target);
+				return CVUtils.matToBufferedImage(target);
+			} else {
+				return CVUtils.matToBufferedImage(allRows.get(0));
+			}
+		} finally {
 			CVUtils.free(allRows);
-			return image;
+			CVUtils.free(target);
 		}
 	}
 

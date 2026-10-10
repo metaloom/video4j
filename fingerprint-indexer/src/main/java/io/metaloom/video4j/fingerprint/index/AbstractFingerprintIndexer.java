@@ -82,7 +82,9 @@ public abstract class AbstractFingerprintIndexer<T extends QueryResult<R>, R ext
 		} else {
 			queryVector = fingerprint.vector();
 		}
-		TopDocs results = searcher.search(new KnnFloatVectorQuery(VECTOR_FIELD_KEY, queryVector, limit), 10);
+		// The top-N of the search must follow the limit too: with the literal 10 that stood here, a query
+		// for more than ten neighbours silently came back with ten.
+		TopDocs results = searcher.search(new KnnFloatVectorQuery(VECTOR_FIELD_KEY, queryVector, limit), limit);
 		return factory.from(reader, results);
 	}
 

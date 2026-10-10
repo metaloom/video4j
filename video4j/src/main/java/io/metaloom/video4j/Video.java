@@ -59,9 +59,9 @@ public interface Video extends AutoCloseable, Iterable<Mat> {
 
 	/**
 	 * Read the next frame and return a mat with the given width.
-	 * 
+	 *
 	 * @param width
-	 * @return
+	 * @return Loaded frame or null if no further frame could be loaded
 	 */
 	Mat boxedFrameToMat(int width);
 
